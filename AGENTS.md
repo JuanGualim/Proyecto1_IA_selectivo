@@ -103,7 +103,8 @@ Reglas estrictas:
 - Nunca hagas commit ni push directo a `main`. Crea `feature/...`, `fix/...`, etc.
 - Commits con Conventional Commits en español: `feat: ...`, `fix: ...`, `test: ...`.
 - Antes de dar una tarea por terminada: `npm run ci` debe pasar completo.
-- Abre un PR hacia `main` usando la plantilla; requiere aprobación de otro integrante.
+- Abre un PR hacia `main` usando la plantilla; requiere los checks de CI en verde y revisión
+  (aprobación de otro integrante, o autorrevisión mientras haya un solo desarrollador).
 
 ## No hacer
 

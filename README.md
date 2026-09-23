@@ -19,6 +19,8 @@ de agente de IA a sus sitios en minutos. Proyecto #1 del curso CC3116.
   sugerencias.
 - ✅ ~99 % de cobertura de tests, lint y CI/CD con GitHub Actions.
 
+🌐 **Demo en vivo:** <https://juangualim.github.io/Proyecto1_IA_selectivo/>
+
 📐 Arquitectura y estructura de carpetas: [`docs/ARQUITECTURA.md`](docs/ARQUITECTURA.md)
 🤝 Cómo contribuir (GitHub Flow): [`CONTRIBUTING.md`](CONTRIBUTING.md)
 🤖 Guía para agentes de código: [`AGENTS.md`](AGENTS.md)

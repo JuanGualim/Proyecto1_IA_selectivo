@@ -252,7 +252,7 @@ flowchart LR
     C --> T["Tests Vitest<br/>cobertura ≥ 80 %"]
     L --> BU["Build SDK + demo"]
     T --> BU
-    BU --> R{"Revisión del equipo<br/>(≥ 1 aprobación)"}
+    BU --> R{"Revisión del PR<br/>(aprobación o autorrevisión)"}
     R -->|"merge"| M["main"]
     M --> CD{"CD"}
     CD --> P["Demo en GitHub Pages"]

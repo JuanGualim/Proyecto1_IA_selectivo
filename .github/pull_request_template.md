@@ -22,4 +22,5 @@ Closes #
 - [ ] Agregué o actualicé tests para el código nuevo
 - [ ] Actualicé la documentación (`README.md`, `docs/ARQUITECTURA.md`, `AGENTS.md`) si aplica
 - [ ] No rompí la API pública exportada en `src/index.ts` (o lo indico como breaking change)
-- [ ] Al menos un integrante del grupo revisó y aprobó este PR
+- [ ] Revisado: aprobado por un integrante del grupo o, mientras haya un solo desarrollador,
+      autorrevisión en _Files changed_ con la lista de `CONTRIBUTING.md`
