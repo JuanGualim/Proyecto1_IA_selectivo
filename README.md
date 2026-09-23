@@ -6,7 +6,9 @@
 SDK de un **widget de chat agéntico** que permite a los clientes de AGIChat añadir una interfaz
 de agente de IA a sus sitios en minutos. Proyecto #1 del curso CC3116.
 
-- 💬 Botón flotante + ventana de chat, responsive (pantalla completa en móvil).
+- 💬 Panel de chat fiel al [wireframe](#sobre-el-wireframe) (bienvenida con avatar, mensajes del
+  usuario en píldora y respuestas del agente en texto plano), embebido o como burbuja flotante;
+  responsive (pantalla completa en móvil).
 - ✍️ Respuestas del agente en **Markdown** (tablas, código con botón copiar, listas de tareas,
   enlaces, citas…) renderizadas de forma segura.
 - ⚡ **Streaming** de respuestas fragmento a fragmento, indicador de "escribiendo" y estados de
@@ -30,8 +32,10 @@ npm install
 npm run dev
 ```
 
-Abre <http://localhost:5173>: es una página de ejemplo que simula el sitio de un cliente con el
-widget integrado. Prueba escribir `ayuda`, `tabla`, `código`, `markdown` o `error`.
+Abre <http://localhost:5173>: es una página de ejemplo que reproduce el wireframe (panel de
+400×700 centrado). Prueba escribir `Hola quiero saber la respuesta del universo!` (la conversación
+del wireframe), `ayuda`, `tabla`, `código`, `markdown` o `error`. En **⚙️ Configurar demo** puedes
+cambiar a burbuja flotante (o abrir <http://localhost:5173/?layout=floating>), el tema y el color.
 
 ### Probar con el servidor WebSocket simulado
 
@@ -75,10 +79,8 @@ export function App() {
   return (
     <ChatWidget
       transport={transport}
-      title="Soporte"
-      subtitle="Respondemos al instante"
-      welcomeMessage="¡Hola! 👋 ¿En qué te ayudo?"
-      suggestions={['Ver planes', 'Hablar con ventas']}
+      assistantName="Sofía"
+      description="Escribe una duda y yo te ayudaré en lo que pueda"
       primaryColor="#0ea5e9"
       theme="auto"
     />
@@ -95,7 +97,7 @@ export function App() {
 <script src="agichat-widget.iife.js"></script>
 <script>
   AGIChat.mountChatWidget({
-    title: 'Soporte',
+    assistantName: 'Sofía',
     transport: { type: 'websocket', url: 'wss://api.agichat.dev/agent' },
   });
 </script>
@@ -106,21 +108,22 @@ crea su propio contenedor en `<body>`.
 
 ### Propiedades de `ChatWidget`
 
-| Prop              | Tipo                              | Por defecto             |
-| ----------------- | --------------------------------- | ----------------------- |
-| `transport`       | `ChatTransport` (obligatorio)     | —                       |
-| `title`           | `string`                          | `'AGIChat'`             |
-| `subtitle`        | `string`                          | `'Asistente virtual'`   |
-| `welcomeMessage`  | `string` (Markdown)               | saludo genérico         |
-| `placeholder`     | `string`                          | `'Escribe un mensaje…'` |
-| `suggestions`     | `string[]`                        | `[]`                    |
-| `position`        | `'bottom-right' \| 'bottom-left'` | `'bottom-right'`        |
-| `theme`           | `'light' \| 'dark' \| 'auto'`     | `'light'`               |
-| `primaryColor`    | color CSS                         | `#6d4aff`               |
-| `mode`            | `'floating' \| 'inline'`          | `'floating'`            |
-| `defaultOpen`     | `boolean`                         | `false`                 |
-| `initialMessages` | `ChatMessage[]`                   | `[]`                    |
-| `onOpenChange`    | `(open: boolean) => void`         | —                       |
+| Prop              | Tipo                              | Por defecto                                          |
+| ----------------- | --------------------------------- | ---------------------------------------------------- |
+| `transport`       | `ChatTransport` (obligatorio)     | —                                                    |
+| `assistantName`   | `string`                          | `'Sofía'`                                            |
+| `greeting`        | `string`                          | `'¡Hola soy tu asistente virtual <assistantName>!'`  |
+| `description`     | `string`                          | `'Escribe una duda y yo te ayudaré en lo que pueda'` |
+| `avatarUrl`       | `string` (URL de imagen)          | osito ilustrado                                      |
+| `placeholder`     | `string`                          | `'Escribe un mensaje…'`                              |
+| `suggestions`     | `string[]`                        | `[]`                                                 |
+| `position`        | `'bottom-right' \| 'bottom-left'` | `'bottom-right'`                                     |
+| `theme`           | `'light' \| 'dark' \| 'auto'`     | `'light'`                                            |
+| `primaryColor`    | color CSS                         | `#6d4aff`                                            |
+| `mode`            | `'floating' \| 'inline'`          | `'floating'`                                         |
+| `defaultOpen`     | `boolean`                         | `false`                                              |
+| `initialMessages` | `ChatMessage[]`                   | `[]`                                                 |
+| `onOpenChange`    | `(open: boolean) => void`         | —                                                    |
 
 ### Conectar un agente real (fase 2)
 
@@ -143,10 +146,21 @@ adaptador que implemente `ChatTransport` (ver `docs/ARQUITECTURA.md`).
 
 ## Sobre el wireframe
 
-La interfaz sigue el patrón del wireframe entregado por Maxine: botón flotante en la esquina,
-ventana con encabezado (avatar, nombre, estado de conexión y acciones), lista de mensajes con
-burbujas diferenciadas para usuario y agente, sugerencias rápidas y campo de texto con botón de
-envío. Paleta y estilos propios (violeta/azul con degradado), según la libertad otorgada.
+La interfaz sigue el [wireframe de Maxine en Penpot](https://design.penpot.app/#/view?file-id=3be9e5e1-190f-8090-8008-6e79481381ed&page-id=3be9e5e1-190f-8090-8008-6e79481381ee&section=interactions&index=0&share-id=81f57451-85cc-819d-8008-6e8de838718a):
+
+| Wireframe                                                       | Implementación                                                                     |
+| --------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| Panel de 400×700 centrado sobre la página                       | `mode="inline"` en un contenedor de 400×700 (demo por defecto)                     |
+| Barra superior de 48 px                                         | Nombre + estado de conexión + borrar/cerrar                                        |
+| Avatar circular de 100 px, saludo (21 px) y descripción (15 px) | Componente `WelcomeHero` (`assistantName`, `greeting`, `description`, `avatarUrl`) |
+| Mensaje del usuario en píldora con borde, alineado a la derecha | `MessageBubble` (rol `user`)                                                       |
+| Respuesta del agente como texto a todo el ancho, sin burbuja    | `MessageBubble` (rol `assistant`) con Markdown                                     |
+| Campo de texto + botón píldora con flecha →                     | `ChatInput`                                                                        |
+
+Se agregaron, sin alterar esa experiencia: streaming con indicador de escritura, estados de
+conexión, errores con reintento, Markdown enriquecido, tema oscuro y la opción de burbuja
+flotante para sitios que prefieran el widget en una esquina. Paleta índigo y tipografía Rubik
+inspiradas en el wireframe, según la libertad de estilos otorgada.
 
 ## Tecnologías
 

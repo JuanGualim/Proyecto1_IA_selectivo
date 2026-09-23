@@ -30,6 +30,7 @@ flowchart TB
         subgraph UI["Capa de presentación (React)"]
             WIDGET["ChatWidget"]
             WINDOW["ChatWindow"]
+            HERO["WelcomeHero"]
             LIST["MessageList / MessageBubble"]
             MD["MarkdownContent<br/>(react-markdown + GFM)"]
             INPUT["ChatInput"]
@@ -60,6 +61,7 @@ flowchart TB
     API --> WIDGET
     WIDGET --> WINDOW --> LIST --> MD
     WINDOW --> INPUT
+    WINDOW --> HERO
     WIDGET --> HOOK
     HOOK --> REDUCER
     HOOK --> PORT
@@ -195,6 +197,7 @@ Los eventos recibidos se validan con `parseServerEvent`; los inválidos se ignor
 │   │   ├── ChatWidget/          #   Componente raíz (launcher + ventana)
 │   │   ├── ChatWindow/
 │   │   ├── ChatLauncher/
+│   │   ├── WelcomeHero/         #   Bienvenida del wireframe (avatar + saludo)
 │   │   ├── MessageList/
 │   │   ├── MessageBubble/
 │   │   ├── MarkdownContent/
