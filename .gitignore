@@ -7,3 +7,6 @@ coverage
 .env.*
 !.env.example
 .claude/launch.json
+
+# Agents
+CLAUDE.md
