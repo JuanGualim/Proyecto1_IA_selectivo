@@ -1,0 +1,137 @@
+:root {
+  font-family:
+    'Inter',
+    system-ui,
+    -apple-system,
+    'Segoe UI',
+    Roboto,
+    sans-serif;
+  color: #1c1d29;
+  background: #fbfbfe;
+}
+
+body {
+  margin: 0;
+}
+
+.demo {
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at 15% 10%, rgba(109, 74, 255, 0.12), transparent 40%),
+    radial-gradient(circle at 85% 30%, rgba(63, 169, 245, 0.12), transparent 40%);
+}
+
+.demo__nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 32px;
+}
+
+.demo__logo {
+  font-size: 22px;
+  letter-spacing: -0.5px;
+}
+
+.demo__logo strong {
+  color: #6d4aff;
+}
+
+.demo__tag {
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #ece8ff;
+  color: #4a2fd1;
+}
+
+.demo__hero {
+  max-width: 720px;
+  padding: 48px 32px 120px;
+}
+
+.demo__hero h1 {
+  font-size: clamp(30px, 5vw, 46px);
+  line-height: 1.1;
+  letter-spacing: -1px;
+  margin: 0 0 16px;
+}
+
+.demo__hero h1 span {
+  background: linear-gradient(135deg, #6d4aff, #3fa9f5);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.demo__hero p {
+  font-size: 17px;
+  color: #50546a;
+  line-height: 1.6;
+}
+
+.demo__hero code {
+  background: #ece8ff;
+  padding: 1px 6px;
+  border-radius: 5px;
+}
+
+.demo__panel {
+  margin-top: 32px;
+  padding: 20px;
+  background: #fff;
+  border: 1px solid #e1e3ee;
+  border-radius: 16px;
+  display: grid;
+  gap: 14px;
+  max-width: 420px;
+}
+
+.demo__panel h2 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.demo__panel label,
+.demo__panel legend {
+  display: grid;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #50546a;
+}
+
+.demo__panel fieldset {
+  border: none;
+  padding: 0;
+  margin: 0;
+}
+
+.demo__panel select,
+.demo__panel input {
+  font: inherit;
+  font-weight: 400;
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: 1px solid #e1e3ee;
+  background: #f7f8fc;
+}
+
+.demo__colors {
+  display: flex;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.demo__color {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 3px solid #fff;
+  box-shadow: 0 0 0 1px #e1e3ee;
+  cursor: pointer;
+}
+
+.demo__color[aria-pressed='true'] {
+  box-shadow: 0 0 0 2px #1c1d29;
+}
