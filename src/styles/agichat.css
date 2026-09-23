@@ -541,7 +541,7 @@
 
 .agichat-codeblock pre {
   margin: 0;
-  padding: 12px;
+  padding: 30px 12px 12px;
   overflow-x: auto;
   border-radius: 10px;
   background: var(--agichat-code-bg);
@@ -587,6 +587,8 @@
 .agichat-markdown td {
   border: 1px solid var(--agichat-border);
   padding: 6px 8px;
+  white-space: nowrap;
+  overflow-wrap: normal;
 }
 
 .agichat-markdown th {
