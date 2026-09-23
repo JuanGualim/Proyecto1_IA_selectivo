@@ -72,6 +72,8 @@ Texto en **negrita**, *cursiva*, ~~tachado~~ y un [enlace](https://github.com).
 | --- | --- |
 | 1 | 2 |`;
 
+const UNIVERSE = `Según *La guía del autoestopista galáctico* de Douglas Adams, la respuesta a la pregunta última sobre la vida, el universo y todo lo demás es **42**.`;
+
 const RULES: Array<{ pattern: RegExp; reply: MockReply }> = [
   { pattern: /\berror\b/i, reply: { error: 'El agente simulado falló a propósito. 💥' } },
   { pattern: /\bmarkdown\b/i, reply: { content: MARKDOWN } },
@@ -79,6 +81,8 @@ const RULES: Array<{ pattern: RegExp; reply: MockReply }> = [
   { pattern: /c[oó]digo|\bcode\b/i, reply: { content: CODE } },
   { pattern: /\blista|list\b/i, reply: { content: LIST } },
   { pattern: /\b(ayuda|help)\b/i, reply: { content: HELP } },
+  // Conversación de ejemplo del wireframe.
+  { pattern: /universo|\b42\b|sentido de la vida/i, reply: { content: UNIVERSE } },
   {
     pattern: /\b(hola|buenas|buenos|hey|hi|hello)\b/i,
     reply: { content: `¡Hola! 👋 ¿En qué puedo ayudarte hoy?\n\n${HELP}` },
