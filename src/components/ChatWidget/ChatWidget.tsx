@@ -73,7 +73,13 @@ export function ChatWidget({
     if (event.key === 'Escape' && isOpen && mode === 'floating') setOpen(false);
   };
 
-  const style = primaryColor ? ({ '--agichat-primary': primaryColor } as CSSProperties) : undefined;
+  // El segundo tono del degradado se deriva del color elegido para mantener la armonía.
+  const style = primaryColor
+    ? ({
+        '--agichat-primary': primaryColor,
+        '--agichat-primary-2': `color-mix(in srgb, ${primaryColor} 65%, #ffffff)`,
+      } as CSSProperties)
+    : undefined;
 
   return (
     <div
