@@ -198,6 +198,7 @@ Los eventos recibidos se validan con `parseServerEvent`; los inválidos se ignor
 │   │   ├── ChatWindow/
 │   │   ├── ChatLauncher/
 │   │   ├── WelcomeHero/         #   Bienvenida del wireframe (avatar + saludo)
+│   │   ├── Avatar/              #   Avatar circular (barra superior y bienvenida)
 │   │   ├── MessageList/
 │   │   ├── MessageBubble/
 │   │   ├── MarkdownContent/

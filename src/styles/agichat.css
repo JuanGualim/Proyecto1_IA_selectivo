@@ -2,25 +2,29 @@
  * Estilos del widget AGIChat.
  * Todas las clases usan el prefijo `agichat-` para no chocar con los estilos del sitio anfitrión.
  * La personalización se hace con variables CSS (`--agichat-*`).
+ * La estructura sigue el wireframe (panel de 400×700, barra superior, bienvenida con avatar,
+ * píldora del usuario, respuesta en texto plano y barra de entrada).
  */
 
 .agichat-root {
-  --agichat-primary: #3f4796;
-  --agichat-primary-2: #727cb5;
+  --agichat-primary: #4f46e5;
+  --agichat-primary-2: #8b5cf6;
   --agichat-on-primary: #ffffff;
   --agichat-bg: #ffffff;
-  --agichat-surface: #f4f5fa;
-  --agichat-surface-2: #e9ebf3;
+  --agichat-surface: #f5f6fb;
+  --agichat-surface-2: #eceef7;
   --agichat-text: #15161c;
   --agichat-text-muted: #6b6f85;
-  --agichat-border: #e1e3ee;
+  --agichat-border: #e6e8f1;
   --agichat-danger: #e5484d;
-  --agichat-success: #30a46c;
+  --agichat-success: #22c55e;
   --agichat-warning: #f5a524;
   --agichat-code-bg: #1e1f2b;
   --agichat-code-text: #e6e7f2;
-  --agichat-radius: 18px;
-  --agichat-shadow: 0 18px 50px rgba(28, 29, 41, 0.18), 0 4px 12px rgba(28, 29, 41, 0.08);
+  --agichat-radius: 24px;
+  --agichat-gradient: linear-gradient(135deg, var(--agichat-primary), var(--agichat-primary-2));
+  --agichat-primary-soft: color-mix(in srgb, var(--agichat-primary) 9%, var(--agichat-bg));
+  --agichat-shadow: 0 24px 60px -12px rgba(30, 27, 75, 0.35), 0 8px 20px -8px rgba(30, 27, 75, 0.2);
   --agichat-font:
     'Rubik', 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
     sans-serif;
@@ -30,6 +34,7 @@
   line-height: 1.5;
   color: var(--agichat-text);
   box-sizing: border-box;
+  -webkit-font-smoothing: antialiased;
 }
 
 .agichat-root *,
@@ -39,28 +44,32 @@
 }
 
 .agichat-root[data-theme='dark'] {
-  --agichat-bg: #16171f;
-  --agichat-surface: #20212c;
-  --agichat-surface-2: #2a2b38;
+  --agichat-bg: #15161e;
+  --agichat-surface: #1d1e29;
+  --agichat-surface-2: #272836;
   --agichat-text: #eceef8;
   --agichat-text-muted: #9a9db3;
-  --agichat-border: #2f3140;
+  --agichat-border: #2b2d3c;
   --agichat-code-bg: #0e0f15;
-  --agichat-primary: #7c85d6;
-  --agichat-shadow: 0 18px 50px rgba(0, 0, 0, 0.5);
+  --agichat-primary: #818cf8;
+  --agichat-primary-2: #c084fc;
+  --agichat-on-primary: #0f1020;
+  --agichat-shadow: 0 24px 60px -12px rgba(0, 0, 0, 0.7);
 }
 
 @media (prefers-color-scheme: dark) {
   .agichat-root[data-theme='auto'] {
-    --agichat-bg: #16171f;
-    --agichat-surface: #20212c;
-    --agichat-surface-2: #2a2b38;
+    --agichat-bg: #15161e;
+    --agichat-surface: #1d1e29;
+    --agichat-surface-2: #272836;
     --agichat-text: #eceef8;
     --agichat-text-muted: #9a9db3;
-    --agichat-border: #2f3140;
+    --agichat-border: #2b2d3c;
     --agichat-code-bg: #0e0f15;
-    --agichat-primary: #7c85d6;
-    --agichat-shadow: 0 18px 50px rgba(0, 0, 0, 0.5);
+    --agichat-primary: #818cf8;
+    --agichat-primary-2: #c084fc;
+    --agichat-on-primary: #0f1020;
+    --agichat-shadow: 0 24px 60px -12px rgba(0, 0, 0, 0.7);
   }
 }
 
@@ -100,8 +109,8 @@
   border-radius: 50%;
   cursor: pointer;
   color: var(--agichat-on-primary);
-  background: linear-gradient(135deg, var(--agichat-primary), var(--agichat-primary-2));
-  box-shadow: 0 10px 25px color-mix(in srgb, var(--agichat-primary) 40%, transparent);
+  background: var(--agichat-gradient);
+  box-shadow: 0 12px 28px -6px color-mix(in srgb, var(--agichat-primary) 60%, transparent);
   display: grid;
   place-items: center;
   transition:
@@ -110,12 +119,11 @@
 }
 
 .agichat-launcher:hover {
-  transform: translateY(-2px) scale(1.04);
+  transform: translateY(-2px) scale(1.05);
 }
 
 .agichat-launcher:focus-visible,
-.agichat-root button:focus-visible,
-.agichat-input__field:focus-visible {
+.agichat-root button:focus-visible {
   outline: 3px solid color-mix(in srgb, var(--agichat-primary) 45%, transparent);
   outline-offset: 2px;
 }
@@ -140,19 +148,42 @@
 /* ---------- Ventana (panel de 400×700 según el wireframe) ---------- */
 
 .agichat-window {
+  position: relative;
   display: flex;
   flex-direction: column;
   background: var(--agichat-bg);
-  border: 1px solid var(--agichat-border);
+  border: 1px solid color-mix(in srgb, var(--agichat-border) 70%, transparent);
   border-radius: var(--agichat-radius);
   box-shadow: var(--agichat-shadow);
   overflow: hidden;
+  isolation: isolate;
+}
+
+/* Halo de color detrás de la bienvenida. */
+.agichat-window::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto;
+  height: 260px;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      60% 70% at 50% 0%,
+      color-mix(in srgb, var(--agichat-primary) 16%, transparent),
+      transparent 70%
+    ),
+    radial-gradient(
+      40% 50% at 85% 10%,
+      color-mix(in srgb, var(--agichat-primary-2) 14%, transparent),
+      transparent 70%
+    );
 }
 
 .agichat-root--floating .agichat-window {
   width: 400px;
   height: min(700px, calc(100vh - 120px));
-  animation: agichat-pop 0.22s ease-out;
+  animation: agichat-pop 0.25s cubic-bezier(0.2, 0.9, 0.3, 1.2);
   transform-origin: bottom right;
 }
 
@@ -168,7 +199,7 @@
 @keyframes agichat-pop {
   from {
     opacity: 0;
-    transform: translateY(12px) scale(0.97);
+    transform: translateY(12px) scale(0.96);
   }
   to {
     opacity: 1;
@@ -176,53 +207,93 @@
   }
 }
 
-/* ---------- Barra superior (48 px) ---------- */
+/* ---------- Avatar ---------- */
+
+.agichat-avatar {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  border-radius: 50%;
+  overflow: hidden;
+  color: var(--agichat-primary);
+  background: var(--agichat-primary-soft);
+}
+
+.agichat-avatar__image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* ---------- Barra superior ---------- */
 
 .agichat-header {
   display: flex;
   align-items: center;
-  gap: 4px;
-  height: 48px;
+  gap: 10px;
+  min-height: 56px;
   flex-shrink: 0;
-  padding: 0 8px 0 16px;
-  background: var(--agichat-bg);
-  border-bottom: 1px solid var(--agichat-border);
+  padding: 10px 10px 10px 14px;
+  background: color-mix(in srgb, var(--agichat-bg) 70%, transparent);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid color-mix(in srgb, var(--agichat-border) 80%, transparent);
 }
 
-.agichat-header__status {
+.agichat-header__avatar {
+  position: relative;
+  display: inline-flex;
+}
+
+.agichat-header__avatar .agichat-status-dot {
+  position: absolute;
+  right: -1px;
+  bottom: -1px;
+  border: 2px solid var(--agichat-bg);
+  width: 12px;
+  height: 12px;
+}
+
+.agichat-header__info {
   flex: 1;
   min-width: 0;
+}
+
+.agichat-header__name,
+.agichat-header__status {
   margin: 0;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 12px;
-  color: var(--agichat-text-muted);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .agichat-header__name {
+  font-size: 15px;
   font-weight: 600;
+  line-height: 1.2;
   color: var(--agichat-text);
 }
 
+.agichat-header__status {
+  font-size: 12px;
+  line-height: 1.3;
+  color: var(--agichat-text-muted);
+}
+
 .agichat-status-dot {
+  display: inline-block;
   width: 8px;
   height: 8px;
   border-radius: 50%;
   background: var(--agichat-text-muted);
-  flex-shrink: 0;
 }
 
 .agichat-status-dot--open {
   background: var(--agichat-success);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--agichat-success) 25%, transparent);
 }
 
 .agichat-status-dot--connecting {
   background: var(--agichat-warning);
+  animation: agichat-pulse 1.2s ease-in-out infinite;
 }
 
 .agichat-status-dot--error,
@@ -230,11 +301,17 @@
   background: var(--agichat-danger);
 }
 
+@keyframes agichat-pulse {
+  50% {
+    opacity: 0.4;
+  }
+}
+
 .agichat-icon-button {
-  width: 34px;
-  height: 34px;
+  width: 36px;
+  height: 36px;
   border: none;
-  border-radius: 10px;
+  border-radius: 12px;
   background: transparent;
   color: var(--agichat-text-muted);
   cursor: pointer;
@@ -246,12 +323,12 @@
 }
 
 .agichat-icon-button:hover:not(:disabled) {
-  background: var(--agichat-surface);
+  background: var(--agichat-surface-2);
   color: var(--agichat-text);
 }
 
 .agichat-icon-button:disabled {
-  opacity: 0.4;
+  opacity: 0.35;
   cursor: not-allowed;
 }
 
@@ -262,40 +339,57 @@
   flex-direction: column;
   align-items: center;
   text-align: center;
-  padding: 0 0 8px;
+  padding: 8px 0 4px;
+  animation: agichat-fade-up 0.4s ease-out both;
+}
+
+/* Anillo en degradado alrededor del avatar de 100 px del wireframe. */
+.agichat-hero__ring {
+  padding: 3px;
+  border-radius: 50%;
+  background: var(--agichat-gradient);
+  box-shadow: 0 12px 30px -10px color-mix(in srgb, var(--agichat-primary) 70%, transparent);
 }
 
 .agichat-hero__avatar {
-  width: 100px;
-  height: 100px;
-  border-radius: 50%;
-  border: 1.5px solid var(--agichat-text);
-  display: grid;
-  place-items: center;
-  overflow: hidden;
-  color: var(--agichat-text);
+  border: 3px solid var(--agichat-bg);
   background: var(--agichat-bg);
 }
 
-.agichat-hero__image {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
 .agichat-hero__title {
-  margin: 16px 0 0;
+  margin: 18px 0 0;
   font-size: 21px;
   font-weight: 500;
-  line-height: 1.25;
+  line-height: 1.3;
+  letter-spacing: -0.2px;
   color: var(--agichat-text);
+}
+
+.agichat-hero__highlight {
+  font-weight: 600;
+  background: var(--agichat-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }
 
 .agichat-hero__description {
   margin: 8px 0 0;
+  max-width: 300px;
   font-size: 15px;
-  line-height: 1.2;
-  color: var(--agichat-text);
+  line-height: 1.45;
+  color: var(--agichat-text-muted);
+}
+
+@keyframes agichat-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
 
 /* ---------- Mensajes ---------- */
@@ -306,19 +400,30 @@
   padding: 24px 16px 16px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  background: var(--agichat-bg);
+  gap: 18px;
   scroll-behavior: smooth;
   font-size: 15px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--agichat-surface-2) transparent;
+}
+
+.agichat-messages::-webkit-scrollbar {
+  width: 6px;
+}
+
+.agichat-messages::-webkit-scrollbar-thumb {
+  border-radius: 3px;
+  background: var(--agichat-surface-2);
 }
 
 .agichat-message {
   display: flex;
   flex-direction: column;
   min-width: 0;
+  animation: agichat-fade-up 0.25s ease-out both;
 }
 
-/* Usuario: píldora con borde, alineada a la derecha. */
+/* Usuario: píldora con borde, alineada a la derecha (base del wireframe). */
 .agichat-message--user {
   align-self: flex-end;
   align-items: flex-end;
@@ -326,16 +431,18 @@
 }
 
 .agichat-message--user .agichat-message__bubble {
-  padding: 14px 16px;
-  border: 1.5px solid var(--agichat-text);
-  border-radius: 21px;
-  background: var(--agichat-bg);
-  font-size: 14px;
+  padding: 11px 16px;
+  border: 1.5px solid color-mix(in srgb, var(--agichat-primary) 45%, transparent);
+  border-radius: 21px 21px 6px 21px;
+  background: var(--agichat-primary-soft);
+  font-size: 14.5px;
+  line-height: 1.45;
 }
 
-/* Agente: texto plano a todo el ancho, sin burbuja ni avatar. */
+/* Agente: texto plano a todo el ancho, sin burbuja (base del wireframe). */
 .agichat-message--assistant {
   align-self: stretch;
+  line-height: 1.6;
 }
 
 .agichat-message__bubble {
@@ -347,6 +454,7 @@
 .agichat-message--error .agichat-message__bubble {
   border-color: var(--agichat-danger);
   border-style: dashed;
+  background: color-mix(in srgb, var(--agichat-danger) 6%, var(--agichat-bg));
 }
 
 .agichat-message__text {
@@ -384,10 +492,11 @@
 
 .agichat-cursor {
   display: inline-block;
-  width: 7px;
-  height: 14px;
+  width: 3px;
+  height: 1em;
   margin-left: 2px;
   vertical-align: text-bottom;
+  border-radius: 2px;
   background: var(--agichat-primary);
   animation: agichat-blink 1s steps(2, start) infinite;
 }
@@ -405,37 +514,47 @@
   flex-wrap: wrap;
   justify-content: center;
   gap: 8px;
+  animation: agichat-fade-up 0.4s 0.1s ease-out both;
 }
 
 .agichat-suggestion {
-  border: 1.5px solid var(--agichat-text);
+  border: 1px solid color-mix(in srgb, var(--agichat-primary) 30%, transparent);
   background: var(--agichat-bg);
-  color: var(--agichat-text);
-  padding: 6px 14px;
+  color: var(--agichat-primary);
+  padding: 7px 14px;
   border-radius: 999px;
   font: inherit;
   font-size: 13px;
+  font-weight: 500;
   cursor: pointer;
-  transition: background 0.15s ease;
+  transition:
+    background 0.15s ease,
+    transform 0.15s ease,
+    border-color 0.15s ease;
 }
 
 .agichat-suggestion:hover {
-  background: var(--agichat-surface);
+  background: var(--agichat-primary-soft);
+  border-color: var(--agichat-primary);
+  transform: translateY(-1px);
 }
 
 /* ---------- Indicador de escritura ---------- */
 
 .agichat-typing {
-  display: flex;
-  gap: 4px;
-  padding: 4px 2px;
+  display: inline-flex;
+  align-self: flex-start;
+  gap: 5px;
+  padding: 10px 14px;
+  border-radius: 999px;
+  background: var(--agichat-surface);
 }
 
 .agichat-typing span {
   width: 7px;
   height: 7px;
   border-radius: 50%;
-  background: var(--agichat-text-muted);
+  background: var(--agichat-primary);
   animation: agichat-bounce 1.2s infinite ease-in-out;
 }
 
@@ -452,10 +571,10 @@
   80%,
   100% {
     transform: translateY(0);
-    opacity: 0.5;
+    opacity: 0.4;
   }
   40% {
-    transform: translateY(-5px);
+    transform: translateY(-4px);
     opacity: 1;
   }
 }
@@ -550,7 +669,7 @@
   margin: 0;
   padding: 30px 12px 12px;
   overflow-x: auto;
-  border-radius: 10px;
+  border-radius: 12px;
   background: var(--agichat-code-bg);
   color: var(--agichat-code-text);
 }
@@ -610,15 +729,21 @@
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  padding: 8px 12px;
+  margin: 0 12px 8px;
+  padding: 8px 8px 8px 14px;
+  border-radius: 12px;
   font-size: 13px;
   color: var(--agichat-danger);
   background: color-mix(in srgb, var(--agichat-danger) 10%, var(--agichat-bg));
-  border-top: 1px solid color-mix(in srgb, var(--agichat-danger) 30%, transparent);
+  border: 1px solid color-mix(in srgb, var(--agichat-danger) 25%, transparent);
+  animation: agichat-fade-up 0.2s ease-out both;
 }
 
 .agichat-error__dismiss {
+  width: 26px;
+  height: 26px;
   border: none;
+  border-radius: 8px;
   background: none;
   color: inherit;
   cursor: pointer;
@@ -626,32 +751,46 @@
   place-items: center;
 }
 
-/* ---------- Entrada (48 px): campo + botón píldora con flecha ---------- */
+.agichat-error__dismiss:hover {
+  background: color-mix(in srgb, var(--agichat-danger) 12%, transparent);
+}
+
+/* ---------- Entrada: campo + botón píldora con flecha (base del wireframe) ---------- */
 
 .agichat-input {
   display: flex;
   align-items: flex-end;
-  gap: 16px;
-  padding: 7px 15px;
-  min-height: 48px;
+  gap: 10px;
+  padding: 10px 12px 12px;
   flex-shrink: 0;
-  border-top: 1px solid var(--agichat-border);
   background: var(--agichat-bg);
+  border-top: 1px solid color-mix(in srgb, var(--agichat-border) 80%, transparent);
 }
 
 .agichat-input__field {
   flex: 1;
   resize: none;
-  border: 1px solid var(--agichat-text);
-  border-radius: 5px;
-  padding: 5px 8px;
-  min-height: 34px;
+  border: 1.5px solid var(--agichat-border);
+  border-radius: 14px;
+  padding: 9px 14px;
+  min-height: 42px;
   font: inherit;
   font-size: 15px;
   color: var(--agichat-text);
-  background: var(--agichat-bg);
+  background: var(--agichat-surface);
   max-height: 120px;
   line-height: 1.4;
+  outline: none;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease,
+    background 0.15s ease;
+}
+
+.agichat-input__field:focus {
+  border-color: var(--agichat-primary);
+  background: var(--agichat-bg);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--agichat-primary) 15%, transparent);
 }
 
 .agichat-input__field::placeholder {
@@ -660,26 +799,30 @@
 
 .agichat-input__send {
   width: 54px;
-  height: 34px;
+  height: 42px;
   flex-shrink: 0;
   border: none;
-  border-radius: 17px;
+  border-radius: 21px;
   cursor: pointer;
   display: grid;
   place-items: center;
   color: var(--agichat-on-primary);
-  background: var(--agichat-primary);
+  background: var(--agichat-gradient);
+  box-shadow: 0 8px 18px -8px color-mix(in srgb, var(--agichat-primary) 80%, transparent);
   transition:
     opacity 0.15s ease,
-    transform 0.15s ease;
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
 }
 
 .agichat-input__send:hover:not(:disabled) {
-  transform: scale(1.05);
+  transform: translateX(2px);
 }
 
 .agichat-input__send:disabled {
-  opacity: 0.4;
+  background: var(--agichat-surface-2);
+  color: var(--agichat-text-muted);
+  box-shadow: none;
   cursor: not-allowed;
 }
 

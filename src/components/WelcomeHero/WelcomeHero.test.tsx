@@ -19,4 +19,19 @@ describe('WelcomeHero', () => {
     const { container } = render(<WelcomeHero greeting="Hola" />);
     expect(container.querySelector('.agichat-hero__description')).toBeNull();
   });
+
+  it('resalta el nombre del asistente dentro del saludo', () => {
+    const { container } = render(
+      <WelcomeHero greeting="¡Hola soy tu asistente virtual Sofía!" highlight="Sofía" />,
+    );
+    expect(container.querySelector('.agichat-hero__highlight')).toHaveTextContent('Sofía');
+    expect(
+      screen.getByRole('heading', { name: '¡Hola soy tu asistente virtual Sofía!' }),
+    ).toBeInTheDocument();
+  });
+
+  it('no resalta nada si el texto no aparece en el saludo', () => {
+    const { container } = render(<WelcomeHero greeting="Bienvenido" highlight="Sofía" />);
+    expect(container.querySelector('.agichat-hero__highlight')).toBeNull();
+  });
 });

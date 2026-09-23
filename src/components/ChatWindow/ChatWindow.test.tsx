@@ -28,7 +28,8 @@ describe('ChatWindow', () => {
       />,
     );
     expect(screen.getByRole('dialog', { name: 'Chat con Sofía' })).toBeInTheDocument();
-    expect(screen.getByText('Sofía')).toBeInTheDocument();
+    expect(screen.getByText('Sofía', { selector: '.agichat-header__name' })).toBeInTheDocument();
+    expect(screen.getByText('Sofía', { selector: '.agichat-hero__highlight' })).toBeInTheDocument();
     expect(screen.getByTestId('connection-status')).toHaveTextContent('En línea');
     expect(
       screen.getByRole('heading', { name: '¡Hola soy tu asistente virtual Sofía!' }),
