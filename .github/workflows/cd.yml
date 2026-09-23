@@ -31,7 +31,7 @@ jobs:
         run: npm run ci
       - name: Empaquetar SDK
         run: npm pack --pack-destination dist
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: sdk-package
           path: dist/*.tgz
