@@ -5,13 +5,13 @@
  */
 
 .agichat-root {
-  --agichat-primary: #6d4aff;
-  --agichat-primary-2: #3fa9f5;
+  --agichat-primary: #3f4796;
+  --agichat-primary-2: #727cb5;
   --agichat-on-primary: #ffffff;
   --agichat-bg: #ffffff;
   --agichat-surface: #f4f5fa;
   --agichat-surface-2: #e9ebf3;
-  --agichat-text: #1c1d29;
+  --agichat-text: #15161c;
   --agichat-text-muted: #6b6f85;
   --agichat-border: #e1e3ee;
   --agichat-danger: #e5484d;
@@ -22,7 +22,8 @@
   --agichat-radius: 18px;
   --agichat-shadow: 0 18px 50px rgba(28, 29, 41, 0.18), 0 4px 12px rgba(28, 29, 41, 0.08);
   --agichat-font:
-    'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    'Rubik', 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
+    sans-serif;
 
   font-family: var(--agichat-font);
   font-size: 14px;
@@ -45,6 +46,7 @@
   --agichat-text-muted: #9a9db3;
   --agichat-border: #2f3140;
   --agichat-code-bg: #0e0f15;
+  --agichat-primary: #7c85d6;
   --agichat-shadow: 0 18px 50px rgba(0, 0, 0, 0.5);
 }
 
@@ -57,6 +59,7 @@
     --agichat-text-muted: #9a9db3;
     --agichat-border: #2f3140;
     --agichat-code-bg: #0e0f15;
+    --agichat-primary: #7c85d6;
     --agichat-shadow: 0 18px 50px rgba(0, 0, 0, 0.5);
   }
 }
@@ -98,7 +101,7 @@
   cursor: pointer;
   color: var(--agichat-on-primary);
   background: linear-gradient(135deg, var(--agichat-primary), var(--agichat-primary-2));
-  box-shadow: 0 10px 25px rgba(109, 74, 255, 0.4);
+  box-shadow: 0 10px 25px color-mix(in srgb, var(--agichat-primary) 40%, transparent);
   display: grid;
   place-items: center;
   transition:
@@ -134,7 +137,7 @@
   border: 2px solid var(--agichat-bg);
 }
 
-/* ---------- Ventana ---------- */
+/* ---------- Ventana (panel de 400×700 según el wireframe) ---------- */
 
 .agichat-window {
   display: flex;
@@ -147,8 +150,8 @@
 }
 
 .agichat-root--floating .agichat-window {
-  width: 380px;
-  height: min(640px, calc(100vh - 120px));
+  width: 400px;
+  height: min(700px, calc(100vh - 120px));
   animation: agichat-pop 0.22s ease-out;
   transform-origin: bottom right;
 }
@@ -173,50 +176,36 @@
   }
 }
 
-/* ---------- Encabezado ---------- */
+/* ---------- Barra superior (48 px) ---------- */
 
 .agichat-header {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 14px 14px 14px 16px;
-  color: var(--agichat-on-primary);
-  background: linear-gradient(135deg, var(--agichat-primary), var(--agichat-primary-2));
-}
-
-.agichat-header__avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 12px;
-  display: grid;
-  place-items: center;
-  background: rgba(255, 255, 255, 0.2);
+  gap: 4px;
+  height: 48px;
   flex-shrink: 0;
+  padding: 0 8px 0 16px;
+  background: var(--agichat-bg);
+  border-bottom: 1px solid var(--agichat-border);
 }
 
-.agichat-header__info {
+.agichat-header__status {
   flex: 1;
   min-width: 0;
-}
-
-.agichat-header__title {
   margin: 0;
-  font-size: 16px;
-  font-weight: 700;
-  line-height: 1.2;
-  color: inherit;
-}
-
-.agichat-header__subtitle {
-  margin: 2px 0 0;
-  font-size: 12px;
-  opacity: 0.9;
   display: flex;
   align-items: center;
   gap: 6px;
+  font-size: 12px;
+  color: var(--agichat-text-muted);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.agichat-header__name {
+  font-weight: 600;
+  color: var(--agichat-text);
 }
 
 .agichat-status-dot {
@@ -228,8 +217,8 @@
 }
 
 .agichat-status-dot--open {
-  background: #4ade80;
-  box-shadow: 0 0 0 3px rgba(74, 222, 128, 0.3);
+  background: var(--agichat-success);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--agichat-success) 25%, transparent);
 }
 
 .agichat-status-dot--connecting {
@@ -247,20 +236,66 @@
   border: none;
   border-radius: 10px;
   background: transparent;
-  color: inherit;
+  color: var(--agichat-text-muted);
   cursor: pointer;
   display: grid;
   place-items: center;
-  transition: background 0.15s ease;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
 }
 
 .agichat-icon-button:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.2);
+  background: var(--agichat-surface);
+  color: var(--agichat-text);
 }
 
 .agichat-icon-button:disabled {
-  opacity: 0.45;
+  opacity: 0.4;
   cursor: not-allowed;
+}
+
+/* ---------- Bienvenida ---------- */
+
+.agichat-hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 0 0 8px;
+}
+
+.agichat-hero__avatar {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  border: 1.5px solid var(--agichat-text);
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  color: var(--agichat-text);
+  background: var(--agichat-bg);
+}
+
+.agichat-hero__image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.agichat-hero__title {
+  margin: 16px 0 0;
+  font-size: 21px;
+  font-weight: 500;
+  line-height: 1.25;
+  color: var(--agichat-text);
+}
+
+.agichat-hero__description {
+  margin: 8px 0 0;
+  font-size: 15px;
+  line-height: 1.2;
+  color: var(--agichat-text);
 }
 
 /* ---------- Mensajes ---------- */
@@ -268,78 +303,50 @@
 .agichat-messages {
   flex: 1;
   overflow-y: auto;
-  padding: 16px;
+  padding: 24px 16px 16px;
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  background: var(--agichat-surface);
+  gap: 16px;
+  background: var(--agichat-bg);
   scroll-behavior: smooth;
+  font-size: 15px;
 }
 
 .agichat-message {
   display: flex;
-  gap: 8px;
-  max-width: 88%;
-  align-items: flex-end;
-}
-
-.agichat-message--user {
-  align-self: flex-end;
-  flex-direction: row-reverse;
-}
-
-.agichat-message--assistant {
-  align-self: flex-start;
-}
-
-.agichat-message__avatar {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  flex-shrink: 0;
-  display: grid;
-  place-items: center;
-  font-size: 10px;
-  font-weight: 700;
-  color: var(--agichat-on-primary);
-  background: linear-gradient(135deg, var(--agichat-primary), var(--agichat-primary-2));
-  margin-bottom: 20px;
-}
-
-.agichat-message__body {
-  display: flex;
   flex-direction: column;
   min-width: 0;
 }
 
-.agichat-message--user .agichat-message__body {
+/* Usuario: píldora con borde, alineada a la derecha. */
+.agichat-message--user {
+  align-self: flex-end;
   align-items: flex-end;
-}
-
-.agichat-message__bubble {
-  padding: 10px 14px;
-  border-radius: 16px;
-  word-wrap: break-word;
-  overflow-wrap: anywhere;
-  min-width: 0;
-  max-width: 100%;
-}
-
-.agichat-message--assistant .agichat-message__bubble {
-  background: var(--agichat-bg);
-  border: 1px solid var(--agichat-border);
-  border-bottom-left-radius: 4px;
+  max-width: 85%;
 }
 
 .agichat-message--user .agichat-message__bubble {
-  background: var(--agichat-primary);
-  color: var(--agichat-on-primary);
-  border-bottom-right-radius: 4px;
+  padding: 14px 16px;
+  border: 1.5px solid var(--agichat-text);
+  border-radius: 21px;
+  background: var(--agichat-bg);
+  font-size: 14px;
+}
+
+/* Agente: texto plano a todo el ancho, sin burbuja ni avatar. */
+.agichat-message--assistant {
+  align-self: stretch;
+}
+
+.agichat-message__bubble {
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: anywhere;
 }
 
 .agichat-message--error .agichat-message__bubble {
-  opacity: 0.75;
-  border: 1px dashed var(--agichat-danger);
+  border-color: var(--agichat-danger);
+  border-style: dashed;
 }
 
 .agichat-message__text {
@@ -391,20 +398,20 @@
   }
 }
 
-/* ---------- Sugerencias ---------- */
+/* ---------- Sugerencias (opcionales) ---------- */
 
 .agichat-suggestions {
   display: flex;
   flex-wrap: wrap;
+  justify-content: center;
   gap: 8px;
-  padding-left: 36px;
 }
 
 .agichat-suggestion {
-  border: 1px solid color-mix(in srgb, var(--agichat-primary) 40%, transparent);
+  border: 1.5px solid var(--agichat-text);
   background: var(--agichat-bg);
-  color: var(--agichat-primary);
-  padding: 6px 12px;
+  color: var(--agichat-text);
+  padding: 6px 14px;
   border-radius: 999px;
   font: inherit;
   font-size: 13px;
@@ -413,7 +420,7 @@
 }
 
 .agichat-suggestion:hover {
-  background: color-mix(in srgb, var(--agichat-primary) 10%, var(--agichat-bg));
+  background: var(--agichat-surface);
 }
 
 /* ---------- Indicador de escritura ---------- */
@@ -619,13 +626,15 @@
   place-items: center;
 }
 
-/* ---------- Entrada ---------- */
+/* ---------- Entrada (48 px): campo + botón píldora con flecha ---------- */
 
 .agichat-input {
   display: flex;
   align-items: flex-end;
-  gap: 8px;
-  padding: 12px;
+  gap: 16px;
+  padding: 7px 15px;
+  min-height: 48px;
+  flex-shrink: 0;
   border-top: 1px solid var(--agichat-border);
   background: var(--agichat-bg);
 }
@@ -633,12 +642,14 @@
 .agichat-input__field {
   flex: 1;
   resize: none;
-  border: 1px solid var(--agichat-border);
-  border-radius: 14px;
-  padding: 10px 14px;
+  border: 1px solid var(--agichat-text);
+  border-radius: 5px;
+  padding: 5px 8px;
+  min-height: 34px;
   font: inherit;
+  font-size: 15px;
   color: var(--agichat-text);
-  background: var(--agichat-surface);
+  background: var(--agichat-bg);
   max-height: 120px;
   line-height: 1.4;
 }
@@ -648,11 +659,11 @@
 }
 
 .agichat-input__send {
-  width: 42px;
-  height: 42px;
+  width: 54px;
+  height: 34px;
   flex-shrink: 0;
   border: none;
-  border-radius: 12px;
+  border-radius: 17px;
   cursor: pointer;
   display: grid;
   place-items: center;
@@ -670,15 +681,6 @@
 .agichat-input__send:disabled {
   opacity: 0.4;
   cursor: not-allowed;
-}
-
-.agichat-footer {
-  margin: 0;
-  padding: 0 0 8px;
-  text-align: center;
-  font-size: 11px;
-  color: var(--agichat-text-muted);
-  background: var(--agichat-bg);
 }
 
 /* ---------- Móvil: pantalla completa ---------- */
