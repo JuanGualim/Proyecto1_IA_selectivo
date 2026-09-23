@@ -2,23 +2,30 @@ import { STATUS_LABELS } from '../../core/format';
 import type { UseChatResult } from '../../hooks/useChat';
 import { ChatInput } from '../ChatInput/ChatInput';
 import { MessageList } from '../MessageList/MessageList';
-import { CloseIcon, SparkIcon, TrashIcon } from '../icons/icons';
+import { WelcomeHero } from '../WelcomeHero/WelcomeHero';
+import { CloseIcon, TrashIcon } from '../icons/icons';
 
 export interface ChatWindowProps {
   chat: UseChatResult;
-  title: string;
-  subtitle?: string;
-  welcomeMessage?: string;
+  assistantName: string;
+  greeting: string;
+  description?: string;
+  avatarUrl?: string;
   placeholder?: string;
   suggestions?: string[];
   onClose?: () => void;
 }
 
+/**
+ * Panel del chat según el wireframe: barra superior mínima, bienvenida centrada,
+ * conversación y barra de entrada.
+ */
 export function ChatWindow({
   chat,
-  title,
-  subtitle,
-  welcomeMessage,
+  assistantName,
+  greeting,
+  description,
+  avatarUrl,
   placeholder,
   suggestions,
   onClose,
@@ -26,22 +33,19 @@ export function ChatWindow({
   const { messages, isResponding, connection, error } = chat;
 
   return (
-    <section className="agichat-window" role="dialog" aria-label={title}>
+    <section className="agichat-window" role="dialog" aria-label={`Chat con ${assistantName}`}>
       <header className="agichat-header">
-        <div className="agichat-header__avatar" aria-hidden="true">
-          <SparkIcon />
-        </div>
-        <div className="agichat-header__info">
-          <h2 className="agichat-header__title">{title}</h2>
-          <p className="agichat-header__subtitle">
-            <span
-              className={`agichat-status-dot agichat-status-dot--${connection}`}
-              aria-hidden="true"
-            />
-            <span data-testid="connection-status">{STATUS_LABELS[connection]}</span>
-            {subtitle && <span className="agichat-header__sep"> · {subtitle}</span>}
-          </p>
-        </div>
+        <p className="agichat-header__status">
+          <span
+            className={`agichat-status-dot agichat-status-dot--${connection}`}
+            aria-hidden="true"
+          />
+          <span className="agichat-header__name">{assistantName}</span>
+          <span className="agichat-header__sep" aria-hidden="true">
+            ·
+          </span>
+          <span data-testid="connection-status">{STATUS_LABELS[connection]}</span>
+        </p>
         <button
           type="button"
           className="agichat-icon-button"
@@ -68,7 +72,7 @@ export function ChatWindow({
       <MessageList
         messages={messages}
         isResponding={isResponding}
-        welcomeMessage={welcomeMessage}
+        intro={<WelcomeHero greeting={greeting} description={description} avatarUrl={avatarUrl} />}
         suggestions={suggestions}
         onSuggestion={chat.sendMessage}
         onRetry={chat.retry}
@@ -89,9 +93,6 @@ export function ChatWindow({
       )}
 
       <ChatInput onSend={chat.sendMessage} disabled={isResponding} placeholder={placeholder} />
-      <p className="agichat-footer">
-        Impulsado por <strong>AGIChat</strong>
-      </p>
     </section>
   );
 }

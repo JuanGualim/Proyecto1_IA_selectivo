@@ -1,5 +1,5 @@
 import { useRef, useState, type FormEvent, type KeyboardEvent } from 'react';
-import { SendIcon } from '../icons/icons';
+import { ArrowRightIcon } from '../icons/icons';
 
 export interface ChatInputProps {
   onSend: (text: string) => void;
@@ -71,7 +71,7 @@ export function ChatInput({
         disabled={!canSend}
         aria-label="Enviar mensaje"
       >
-        <SendIcon />
+        <ArrowRightIcon />
       </button>
     </form>
   );

@@ -12,11 +12,11 @@ describe('mountChatWidget', () => {
   it('monta en un contenedor creado automáticamente con MockTransport por defecto', async () => {
     let widget!: ReturnType<typeof mountChatWidget>;
     await act(async () => {
-      widget = mountChatWidget({ title: 'Soporte', defaultOpen: true });
+      widget = mountChatWidget({ assistantName: 'Soporte', defaultOpen: true });
     });
     expect(widget.transport).toBeInstanceOf(MockTransport);
     expect(document.getElementById('agichat-widget')).not.toBeNull();
-    expect(screen.getByRole('dialog', { name: 'Soporte' })).toBeInTheDocument();
+    expect(screen.getByRole('dialog', { name: 'Chat con Soporte' })).toBeInTheDocument();
 
     await act(async () => widget.unmount());
     expect(document.getElementById('agichat-widget')).toBeNull();
