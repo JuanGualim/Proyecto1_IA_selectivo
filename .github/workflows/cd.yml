@@ -1,0 +1,76 @@
+# Entrega continua:
+#  - Cada merge a main publica la demo en GitHub Pages y guarda el paquete del SDK como artefacto.
+#  - Cada tag `v*` (p. ej. v0.2.0) crea un GitHub Release con el SDK empaquetado adjunto.
+name: CD
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  workflow_dispatch:
+
+concurrency:
+  group: cd-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Verificación completa
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - name: Lint + formato + tipos + tests + build
+        run: npm run ci
+      - name: Empaquetar SDK
+        run: npm pack --pack-destination dist
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sdk-package
+          path: dist/*.tgz
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist/demo
+
+  deploy-demo:
+    name: Publicar demo en GitHub Pages
+    needs: verify
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
+
+  release:
+    name: Crear GitHub Release
+    needs: verify
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: sdk-package
+          path: release
+      - name: Publicar release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" release/*.tgz \
+            --repo "$GITHUB_REPOSITORY" \
+            --title "AGIChat Widget $GITHUB_REF_NAME" \
+            --generate-notes
