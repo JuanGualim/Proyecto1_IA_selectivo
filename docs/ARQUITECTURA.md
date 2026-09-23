@@ -260,5 +260,8 @@ flowchart LR
 - **Lint:** ESLint (typescript-eslint + reglas de React Hooks) y Prettier; ambos bloquean el CI.
 - **Tests:** Vitest + Testing Library. El umbral de 80 % (líneas, ramas, funciones y
   sentencias) está configurado en `vite.config.ts`: si baja, el CI falla.
+- **Robustez al incrustarse:** el build del SDK escapa todo carácter no ASCII (plugin
+  `asciiOnly` en `vite.lib.config.ts`), para que los textos en español se vean bien aunque el
+  sitio del cliente no declare `<meta charset="utf-8">`. El CI lo verifica.
 - **Seguridad del Markdown:** `react-markdown` no interpreta HTML crudo y sanea URLs
   (`javascript:` se bloquea); los enlaces abren con `rel="noopener noreferrer"`.

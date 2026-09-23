@@ -76,6 +76,13 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run build
+      - name: Verificar que el bundle del SDK sea solo ASCII
+        # El widget se incrusta en sitios de terceros que pueden no declarar UTF-8.
+        run: |
+          if LC_ALL=C grep -lP '[^\x00-\x7F]' dist/lib/*.js dist/embed/*.js; then
+            echo "::error::El bundle contiene caracteres no ASCII (ver plugin asciiOnly en vite.lib.config.ts)"
+            exit 1
+          fi
       - name: Empaquetar SDK
         run: npm pack --pack-destination dist
       - uses: actions/upload-artifact@v4
