@@ -14,6 +14,7 @@ type Layout = 'panel' | 'floating';
 const DEFAULT_WS_URL = 'ws://127.0.0.1:8787';
 /** `undefined` = color por defecto del widget (respeta el tema oscuro). */
 const COLORS: Array<string | undefined> = [undefined, '#0ea5e9', '#10b981', '#f43f5e', '#15161c'];
+const SUGGESTIONS = ['¿Cuál es la respuesta del universo?', 'Muéstrame una tabla', 'Dame código'];
 
 function readParam(name: string): string | null {
   return new URLSearchParams(window.location.search).get(name);
@@ -51,6 +52,7 @@ export function DemoApp() {
       theme={theme}
       position={position}
       primaryColor={color}
+      suggestions={SUGGESTIONS}
       defaultOpen
     />
   );
@@ -71,7 +73,7 @@ export function DemoApp() {
         <label>
           Backend
           <select value={kind} onChange={(e) => setKind(e.target.value as TransportKind)}>
-            <option value="mock">Mock en el navegador (MockTransport)</option>
+            <option value="mock">Mock en el navegador</option>
             <option value="websocket">WebSocket (npm run mock-server)</option>
           </select>
         </label>
@@ -118,7 +120,7 @@ export function DemoApp() {
                 key={c ?? 'default'}
                 type="button"
                 className="demo__color"
-                style={{ background: c ?? '#3f4796' }}
+                style={{ background: c ?? 'linear-gradient(135deg, #4f46e5, #8b5cf6)' }}
                 aria-label={c ? `Color ${c}` : 'Color por defecto'}
                 aria-pressed={color === c}
                 onClick={() => setColor(c)}
