@@ -1,0 +1,76 @@
+{
+  "name": "agichat-widget",
+  "version": "0.1.0",
+  "description": "SDK de widget de chat agéntico de AGIChat",
+  "type": "module",
+  "license": "MIT",
+  "main": "./dist/lib/agichat-widget.js",
+  "module": "./dist/lib/agichat-widget.js",
+  "types": "./dist/lib/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/lib/index.d.ts",
+      "import": "./dist/lib/agichat-widget.js"
+    },
+    "./style.css": "./dist/lib/agichat-widget.css"
+  },
+  "files": [
+    "dist/lib",
+    "dist/embed"
+  ],
+  "engines": {
+    "node": ">=22.18"
+  },
+  "scripts": {
+    "dev": "vite",
+    "mock-server": "node mock-server/server.ts",
+    "build": "npm run build:lib && npm run build:embed && npm run build:demo",
+    "build:lib": "vite build --config vite.lib.config.ts --mode lib && tsc -p tsconfig.lib.json",
+    "build:embed": "vite build --config vite.lib.config.ts --mode embed",
+    "build:demo": "vite build",
+    "preview": "vite preview",
+    "lint": "eslint . --max-warnings 0",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "ci": "npm run lint && npm run format:check && npm run typecheck && npm run test:coverage && npm run build"
+  },
+  "peerDependencies": {
+    "react": ">=18",
+    "react-dom": ">=18"
+  },
+  "dependencies": {
+    "react-markdown": "^10.1.0",
+    "remark-gfm": "^4.0.1"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@testing-library/jest-dom": "^7.0.1",
+    "@testing-library/react": "^16.3.3",
+    "@testing-library/user-event": "^14.6.7",
+    "@types/node": "^26.6.2",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@types/ws": "^8.18.1",
+    "@vitejs/plugin-react": "^6.1.1",
+    "@vitest/coverage-v8": "^5.0.1",
+    "eslint": "^10.11.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "eslint-plugin-react-refresh": "^0.5.7",
+    "globals": "^17.12.0",
+    "jsdom": "^30.1.1",
+    "prettier": "^3.9.8",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "typescript": "~6.0",
+    "typescript-eslint": "^8.70.1",
+    "vite": "^8.3.0",
+    "vitest": "^5.0.1",
+    "ws": "^8.21.3"
+  }
+}
