@@ -1,5 +1,6 @@
 import { STATUS_LABELS } from '../../core/format';
 import type { UseChatResult } from '../../hooks/useChat';
+import { Avatar } from '../Avatar/Avatar';
 import { ChatInput } from '../ChatInput/ChatInput';
 import { MessageList } from '../MessageList/MessageList';
 import { WelcomeHero } from '../WelcomeHero/WelcomeHero';
@@ -35,17 +36,19 @@ export function ChatWindow({
   return (
     <section className="agichat-window" role="dialog" aria-label={`Chat con ${assistantName}`}>
       <header className="agichat-header">
-        <p className="agichat-header__status">
+        <span className="agichat-header__avatar">
+          <Avatar src={avatarUrl} size={34} />
           <span
             className={`agichat-status-dot agichat-status-dot--${connection}`}
             aria-hidden="true"
           />
-          <span className="agichat-header__name">{assistantName}</span>
-          <span className="agichat-header__sep" aria-hidden="true">
-            ·
-          </span>
-          <span data-testid="connection-status">{STATUS_LABELS[connection]}</span>
-        </p>
+        </span>
+        <div className="agichat-header__info">
+          <p className="agichat-header__name">{assistantName}</p>
+          <p className="agichat-header__status" data-testid="connection-status">
+            {STATUS_LABELS[connection]}
+          </p>
+        </div>
         <button
           type="button"
           className="agichat-icon-button"
@@ -72,7 +75,14 @@ export function ChatWindow({
       <MessageList
         messages={messages}
         isResponding={isResponding}
-        intro={<WelcomeHero greeting={greeting} description={description} avatarUrl={avatarUrl} />}
+        intro={
+          <WelcomeHero
+            greeting={greeting}
+            description={description}
+            avatarUrl={avatarUrl}
+            highlight={assistantName}
+          />
+        }
         suggestions={suggestions}
         onSuggestion={chat.sendMessage}
         onRetry={chat.retry}
