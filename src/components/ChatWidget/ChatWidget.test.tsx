@@ -11,13 +11,37 @@ describe('ChatWidget', () => {
     expect(screen.queryByRole('dialog')).toBeNull();
 
     await userEvent.click(screen.getByRole('button', { name: 'Abrir chat' }));
-    expect(screen.getByRole('dialog', { name: 'AGIChat' })).toBeInTheDocument();
+    expect(screen.getByRole('dialog', { name: 'Chat con Sofía' })).toBeInTheDocument();
     expect(onOpenChange).toHaveBeenLastCalledWith(true);
 
     const dialog = screen.getByRole('dialog');
     await userEvent.click(within(dialog).getByRole('button', { name: 'Cerrar chat' }));
     expect(screen.queryByRole('dialog')).toBeNull();
     expect(onOpenChange).toHaveBeenLastCalledWith(false);
+  });
+
+  it('muestra la bienvenida del wireframe con nombre, saludo y descripción personalizables', () => {
+    const { rerender } = render(<ChatWidget transport={new FakeTransport()} mode="inline" />);
+    expect(
+      screen.getByRole('heading', { name: '¡Hola soy tu asistente virtual Sofía!' }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText('Escribe una duda y yo te ayudaré en lo que pueda'),
+    ).toBeInTheDocument();
+
+    rerender(
+      <ChatWidget
+        transport={new FakeTransport()}
+        mode="inline"
+        assistantName="Max"
+        greeting="Bienvenido a la tienda"
+        description="Pregunta por tu pedido"
+        avatarUrl="https://example.com/max.png"
+      />,
+    );
+    expect(screen.getByRole('dialog', { name: 'Chat con Max' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Bienvenido a la tienda' })).toBeInTheDocument();
+    expect(screen.getByText('Pregunta por tu pedido')).toBeInTheDocument();
   });
 
   it('cierra con la tecla Escape', () => {

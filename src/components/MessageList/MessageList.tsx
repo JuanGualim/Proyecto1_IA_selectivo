@@ -1,13 +1,13 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, type ReactNode } from 'react';
 import type { ChatMessage } from '../../core/types';
-import { MarkdownContent } from '../MarkdownContent/MarkdownContent';
 import { MessageBubble } from '../MessageBubble/MessageBubble';
 import { TypingIndicator } from '../TypingIndicator/TypingIndicator';
 
 export interface MessageListProps {
   messages: ChatMessage[];
   isResponding: boolean;
-  welcomeMessage?: string;
+  /** Contenido fijo al inicio de la conversación (p. ej. la bienvenida). */
+  intro?: ReactNode;
   suggestions?: string[];
   onSuggestion?: (text: string) => void;
   onRetry?: (id: string) => void;
@@ -16,7 +16,7 @@ export interface MessageListProps {
 export function MessageList({
   messages,
   isResponding,
-  welcomeMessage,
+  intro,
   suggestions = [],
   onSuggestion,
   onRetry,
@@ -32,18 +32,7 @@ export function MessageList({
 
   return (
     <div className="agichat-messages" role="log" aria-live="polite" aria-label="Mensajes">
-      {welcomeMessage && (
-        <div className="agichat-message agichat-message--assistant agichat-message--welcome">
-          <div className="agichat-message__avatar" aria-hidden="true">
-            AI
-          </div>
-          <div className="agichat-message__body">
-            <div className="agichat-message__bubble">
-              <MarkdownContent content={welcomeMessage} />
-            </div>
-          </div>
-        </div>
-      )}
+      {intro}
 
       {messages.length === 0 && suggestions.length > 0 && (
         <div className="agichat-suggestions" aria-label="Sugerencias">
@@ -66,12 +55,7 @@ export function MessageList({
 
       {showTyping && (
         <div className="agichat-message agichat-message--assistant">
-          <div className="agichat-message__avatar" aria-hidden="true">
-            AI
-          </div>
-          <div className="agichat-message__bubble">
-            <TypingIndicator />
-          </div>
+          <TypingIndicator />
         </div>
       )}
       <div ref={endRef} />

@@ -1,99 +1,90 @@
+/* Estilos de la página de ejemplo (no forman parte del SDK). */
 :root {
   font-family:
-    'Inter',
+    'Rubik',
     system-ui,
     -apple-system,
     'Segoe UI',
     Roboto,
     sans-serif;
-  color: #1c1d29;
-  background: #fbfbfe;
+  color: #15161c;
 }
 
 body {
   margin: 0;
+  background: #727cb5; /* color de la página en el wireframe */
 }
 
 .demo {
   min-height: 100vh;
-  background:
-    radial-gradient(circle at 15% 10%, rgba(109, 74, 255, 0.12), transparent 40%),
-    radial-gradient(circle at 85% 30%, rgba(63, 169, 245, 0.12), transparent 40%);
 }
 
-.demo__nav {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 20px 32px;
+/* Panel centrado de 400×700, igual que el wireframe. */
+.demo__stage {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 24px 16px;
+  box-sizing: border-box;
 }
 
-.demo__logo {
-  font-size: 22px;
-  letter-spacing: -0.5px;
-}
-
-.demo__logo strong {
-  color: #6d4aff;
-}
-
-.demo__tag {
-  font-size: 12px;
-  padding: 4px 10px;
-  border-radius: 999px;
-  background: #ece8ff;
-  color: #4a2fd1;
-}
-
-.demo__hero {
-  max-width: 720px;
-  padding: 48px 32px 120px;
-}
-
-.demo__hero h1 {
-  font-size: clamp(30px, 5vw, 46px);
-  line-height: 1.1;
-  letter-spacing: -1px;
-  margin: 0 0 16px;
-}
-
-.demo__hero h1 span {
-  background: linear-gradient(135deg, #6d4aff, #3fa9f5);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
-
-.demo__hero p {
-  font-size: 17px;
-  color: #50546a;
-  line-height: 1.6;
-}
-
-.demo__hero code {
-  background: #ece8ff;
-  padding: 1px 6px;
-  border-radius: 5px;
+.demo__stage:not(.demo__stage--floating) {
+  grid-template-columns: minmax(0, 400px);
+  justify-content: center;
 }
 
 .demo__panel {
-  margin-top: 32px;
-  padding: 20px;
-  background: #fff;
-  border: 1px solid #e1e3ee;
-  border-radius: 16px;
-  display: grid;
-  gap: 14px;
+  width: 100%;
+  height: min(700px, calc(100vh - 48px));
+}
+
+@media (max-width: 760px) {
+  /* Deja espacio a la configuración plegable arriba. */
+  .demo__stage:not(.demo__stage--floating) {
+    padding-top: 72px;
+    align-items: start;
+  }
+
+  .demo__panel {
+    height: calc(100vh - 96px);
+  }
+}
+
+.demo__note {
+  color: #fff;
+  font-size: 18px;
+  text-align: center;
   max-width: 420px;
 }
 
-.demo__panel h2 {
-  margin: 0;
-  font-size: 16px;
+/* Configuración plegable. */
+.demo__settings {
+  position: fixed;
+  top: 16px;
+  left: 16px;
+  z-index: 10;
+  width: 280px;
+  max-width: calc(100vw - 32px);
+  padding: 12px 16px;
+  box-sizing: border-box;
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 10px 30px rgba(21, 22, 28, 0.2);
+  font-size: 14px;
 }
 
-.demo__panel label,
-.demo__panel legend {
+.demo__settings summary {
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.demo__settings[open] {
+  display: grid;
+  gap: 12px;
+}
+
+.demo__settings label,
+.demo__settings legend {
   display: grid;
   gap: 6px;
   font-size: 13px;
@@ -101,19 +92,19 @@ body {
   color: #50546a;
 }
 
-.demo__panel fieldset {
+.demo__settings fieldset {
   border: none;
   padding: 0;
   margin: 0;
 }
 
-.demo__panel select,
-.demo__panel input {
+.demo__settings select,
+.demo__settings input {
   font: inherit;
   font-weight: 400;
-  padding: 8px 10px;
-  border-radius: 10px;
-  border: 1px solid #e1e3ee;
+  padding: 7px 9px;
+  border-radius: 8px;
+  border: 1px solid #d6d8e6;
   background: #f7f8fc;
 }
 
@@ -124,14 +115,26 @@ body {
 }
 
 .demo__color {
-  width: 28px;
-  height: 28px;
+  width: 26px;
+  height: 26px;
   border-radius: 50%;
   border: 3px solid #fff;
-  box-shadow: 0 0 0 1px #e1e3ee;
+  box-shadow: 0 0 0 1px #d6d8e6;
   cursor: pointer;
 }
 
 .demo__color[aria-pressed='true'] {
-  box-shadow: 0 0 0 2px #1c1d29;
+  box-shadow: 0 0 0 2px #15161c;
+}
+
+.demo__hint {
+  margin: 0;
+  color: #50546a;
+  font-size: 13px;
+}
+
+.demo__hint code {
+  background: #eceefa;
+  padding: 1px 5px;
+  border-radius: 4px;
 }

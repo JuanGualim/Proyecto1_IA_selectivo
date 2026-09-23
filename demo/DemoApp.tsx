@@ -9,24 +9,32 @@ import {
 } from '../src';
 
 type TransportKind = 'mock' | 'websocket';
+type Layout = 'panel' | 'floating';
 
 const DEFAULT_WS_URL = 'ws://127.0.0.1:8787';
-const SUGGESTIONS = ['Hola', 'Muéstrame una tabla', 'Dame código', 'markdown'];
-const COLORS = ['#6d4aff', '#0ea5e9', '#10b981', '#f43f5e', '#f59e0b'];
+/** `undefined` = color por defecto del widget (respeta el tema oscuro). */
+const COLORS: Array<string | undefined> = [undefined, '#0ea5e9', '#10b981', '#f43f5e', '#15161c'];
 
-function readInitialTransport(): TransportKind {
-  const params = new URLSearchParams(window.location.search);
-  return params.get('transport') === 'websocket' ? 'websocket' : 'mock';
+function readParam(name: string): string | null {
+  return new URLSearchParams(window.location.search).get(name);
 }
 
-/** Página de ejemplo que simula el sitio de un cliente de AGIChat usando el SDK. */
+/**
+ * Página de ejemplo que simula el sitio de un cliente usando el SDK.
+ * Por defecto reproduce el wireframe: panel de 400×700 centrado sobre la página.
+ */
 export function DemoApp() {
-  const [kind, setKind] = useState<TransportKind>(readInitialTransport);
+  const [layout, setLayout] = useState<Layout>(
+    readParam('layout') === 'floating' ? 'floating' : 'panel',
+  );
+  const [kind, setKind] = useState<TransportKind>(
+    readParam('transport') === 'websocket' ? 'websocket' : 'mock',
+  );
   const [wsUrl, setWsUrl] = useState(DEFAULT_WS_URL);
   const [wsUrlDraft, setWsUrlDraft] = useState(DEFAULT_WS_URL);
   const [theme, setTheme] = useState<ChatWidgetTheme>('light');
   const [position, setPosition] = useState<ChatWidgetPosition>('bottom-right');
-  const [color, setColor] = useState(COLORS[0] as string);
+  const [color, setColor] = useState<string | undefined>(undefined);
 
   // Cambiar de adaptador es lo único necesario para pasar del mock al agente real.
   const transport = useMemo<ChatTransport>(
@@ -34,57 +42,62 @@ export function DemoApp() {
     [kind, wsUrl],
   );
 
+  const widget = (
+    <ChatWidget
+      key={`${kind}-${wsUrl}-${layout}`}
+      transport={transport}
+      assistantName="Sofía"
+      mode={layout === 'panel' ? 'inline' : 'floating'}
+      theme={theme}
+      position={position}
+      primaryColor={color}
+      defaultOpen
+    />
+  );
+
   return (
     <div className="demo">
-      <header className="demo__nav">
-        <span className="demo__logo">
-          AGI<strong>Chat</strong>
-        </span>
-        <span className="demo__tag">SDK demo · Fase 1</span>
-      </header>
+      <details className="demo__settings">
+        <summary>⚙️ Configurar demo</summary>
 
-      <main className="demo__hero">
-        <h1>
-          Añade un agente de IA a tu producto <span>en minutos</span>
-        </h1>
-        <p>
-          Esta página simula el sitio de un cliente que integró el widget de AGIChat. Abre el chat
-          en la esquina inferior y prueba escribir <code>ayuda</code>, <code>tabla</code>,{' '}
-          <code>código</code> o <code>error</code>.
-        </p>
+        <label>
+          Diseño
+          <select value={layout} onChange={(e) => setLayout(e.target.value as Layout)}>
+            <option value="panel">Panel centrado (wireframe)</option>
+            <option value="floating">Burbuja flotante</option>
+          </select>
+        </label>
 
-        <section className="demo__panel" aria-label="Configuración del widget">
-          <h2>Configura el widget</h2>
+        <label>
+          Backend
+          <select value={kind} onChange={(e) => setKind(e.target.value as TransportKind)}>
+            <option value="mock">Mock en el navegador (MockTransport)</option>
+            <option value="websocket">WebSocket (npm run mock-server)</option>
+          </select>
+        </label>
 
+        {kind === 'websocket' && (
           <label>
-            Backend
-            <select value={kind} onChange={(e) => setKind(e.target.value as TransportKind)}>
-              <option value="mock">Mock en el navegador (MockTransport)</option>
-              <option value="websocket">WebSocket (npm run mock-server)</option>
-            </select>
+            URL del WebSocket
+            <input
+              value={wsUrlDraft}
+              onChange={(e) => setWsUrlDraft(e.target.value)}
+              onBlur={() => setWsUrl(wsUrlDraft.trim())}
+              onKeyDown={(e) => e.key === 'Enter' && setWsUrl(wsUrlDraft.trim())}
+            />
           </label>
+        )}
 
-          {kind === 'websocket' && (
-            <label>
-              URL del WebSocket
-              <input
-                value={wsUrlDraft}
-                onChange={(e) => setWsUrlDraft(e.target.value)}
-                onBlur={() => setWsUrl(wsUrlDraft.trim())}
-                onKeyDown={(e) => e.key === 'Enter' && setWsUrl(wsUrlDraft.trim())}
-              />
-            </label>
-          )}
+        <label>
+          Tema
+          <select value={theme} onChange={(e) => setTheme(e.target.value as ChatWidgetTheme)}>
+            <option value="light">Claro</option>
+            <option value="dark">Oscuro</option>
+            <option value="auto">Automático</option>
+          </select>
+        </label>
 
-          <label>
-            Tema
-            <select value={theme} onChange={(e) => setTheme(e.target.value as ChatWidgetTheme)}>
-              <option value="light">Claro</option>
-              <option value="dark">Oscuro</option>
-              <option value="auto">Automático</option>
-            </select>
-          </label>
-
+        {layout === 'floating' && (
           <label>
             Posición
             <select
@@ -95,38 +108,43 @@ export function DemoApp() {
               <option value="bottom-left">Abajo a la izquierda</option>
             </select>
           </label>
+        )}
 
-          <fieldset>
-            <legend>Color principal</legend>
-            <div className="demo__colors">
-              {COLORS.map((c) => (
-                <button
-                  key={c}
-                  type="button"
-                  className="demo__color"
-                  style={{ background: c }}
-                  aria-label={`Color ${c}`}
-                  aria-pressed={color === c}
-                  onClick={() => setColor(c)}
-                />
-              ))}
-            </div>
-          </fieldset>
-        </section>
-      </main>
+        <fieldset>
+          <legend>Color principal</legend>
+          <div className="demo__colors">
+            {COLORS.map((c) => (
+              <button
+                key={c ?? 'default'}
+                type="button"
+                className="demo__color"
+                style={{ background: c ?? '#3f4796' }}
+                aria-label={c ? `Color ${c}` : 'Color por defecto'}
+                aria-pressed={color === c}
+                onClick={() => setColor(c)}
+              />
+            ))}
+          </div>
+        </fieldset>
 
-      <ChatWidget
-        key={`${kind}-${wsUrl}`}
-        transport={transport}
-        title="AGIChat"
-        subtitle="Asistente virtual"
-        welcomeMessage="¡Hola! 👋 Soy el asistente de **AGIChat**. ¿En qué puedo ayudarte hoy?"
-        suggestions={SUGGESTIONS}
-        theme={theme}
-        position={position}
-        primaryColor={color}
-        defaultOpen
-      />
+        <p className="demo__hint">
+          Prueba escribir <code>ayuda</code>, <code>tabla</code>, <code>código</code>,{' '}
+          <code>markdown</code> o <code>error</code>.
+        </p>
+      </details>
+
+      {layout === 'panel' ? (
+        <main className="demo__stage">
+          <div className="demo__panel">{widget}</div>
+        </main>
+      ) : (
+        <main className="demo__stage demo__stage--floating">
+          <p className="demo__note">
+            El widget está en la esquina inferior. Así se ve incrustado en el sitio de un cliente.
+          </p>
+          {widget}
+        </main>
+      )}
     </div>
   );
 }

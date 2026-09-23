@@ -13,10 +13,12 @@ const message = (overrides: Partial<ChatMessage> = {}): ChatMessage => ({
 });
 
 describe('MessageBubble', () => {
-  it('renderiza los mensajes del agente como Markdown', () => {
-    render(<MessageBubble message={message()} />);
+  it('renderiza los mensajes del agente como Markdown, sin avatar y con la hora al pasar el cursor', () => {
+    const { container } = render(<MessageBubble message={message()} />);
     expect(screen.getByText('hola').tagName).toBe('STRONG');
-    expect(screen.getByText('10:30')).toBeInTheDocument();
+    expect(screen.getByTestId('message-assistant')).toHaveAttribute('title', '10:30');
+    expect(container.querySelector('.agichat-message__avatar')).toBeNull();
+    expect(container.querySelector('.agichat-message__meta')).toBeNull();
   });
 
   it('renderiza los mensajes del usuario como texto plano', () => {

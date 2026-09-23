@@ -12,10 +12,14 @@ export type ChatWidgetTheme = 'light' | 'dark' | 'auto';
 export interface ChatWidgetProps {
   /** Adaptador de comunicación con el agente (mock, WebSocket o uno propio). */
   transport: ChatTransport;
-  title?: string;
-  subtitle?: string;
-  /** Mensaje de bienvenida en Markdown, siempre visible al inicio de la conversación. */
-  welcomeMessage?: string;
+  /** Nombre del asistente, visible en la barra superior y en el saludo. */
+  assistantName?: string;
+  /** Saludo principal de la bienvenida. Por defecto: "¡Hola soy tu asistente virtual <nombre>!". */
+  greeting?: string;
+  /** Texto bajo el saludo. */
+  description?: string;
+  /** Imagen del avatar de la bienvenida. Por defecto, un osito ilustrado. */
+  avatarUrl?: string;
   placeholder?: string;
   /** Sugerencias rápidas que se muestran cuando la conversación está vacía. */
   suggestions?: string[];
@@ -38,9 +42,10 @@ function countAssistantReplies(messages: ChatMessage[]): number {
 /** Componente raíz del SDK: botón flotante + ventana de chat. */
 export function ChatWidget({
   transport,
-  title = 'AGIChat',
-  subtitle = 'Asistente virtual',
-  welcomeMessage = '¡Hola! 👋 Soy tu asistente virtual. ¿En qué puedo ayudarte?',
+  assistantName = 'Sofía',
+  greeting,
+  description = 'Escribe una duda y yo te ayudaré en lo que pueda',
+  avatarUrl,
   placeholder,
   suggestions,
   position = 'bottom-right',
@@ -80,9 +85,10 @@ export function ChatWidget({
       {isOpen && (
         <ChatWindow
           chat={chat}
-          title={title}
-          subtitle={subtitle}
-          welcomeMessage={welcomeMessage}
+          assistantName={assistantName}
+          greeting={greeting ?? `¡Hola soy tu asistente virtual ${assistantName}!`}
+          description={description}
+          avatarUrl={avatarUrl}
           placeholder={placeholder}
           suggestions={suggestions}
           onClose={mode === 'floating' ? () => setOpen(false) : undefined}

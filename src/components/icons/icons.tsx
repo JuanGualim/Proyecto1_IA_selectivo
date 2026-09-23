@@ -31,15 +31,6 @@ export function CloseIcon(props: IconProps) {
   );
 }
 
-export function SendIcon(props: IconProps) {
-  return (
-    <svg {...base} {...props}>
-      <path d="m22 2-7 20-4-9-9-4Z" />
-      <path d="M22 2 11 13" />
-    </svg>
-  );
-}
-
 export function TrashIcon(props: IconProps) {
   return (
     <svg {...base} {...props}>
@@ -57,10 +48,27 @@ export function RetryIcon(props: IconProps) {
   );
 }
 
-export function SparkIcon(props: IconProps) {
+export function ArrowRightIcon(props: IconProps) {
   return (
     <svg {...base} {...props}>
-      <path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5 18 18M6 18l2.5-2.5M15.5 8.5 18 6" />
+      <path d="M5 12h14M13 6l6 6-6 6" />
+    </svg>
+  );
+}
+
+/** Avatar por defecto del asistente (osito), inspirado en el wireframe. */
+export function BearAvatarIcon(props: IconProps) {
+  return (
+    <svg viewBox="0 0 64 64" aria-hidden focusable={false} {...props}>
+      <circle cx="16" cy="16" r="9" fill="currentColor" />
+      <circle cx="48" cy="16" r="9" fill="currentColor" />
+      <circle cx="16" cy="16" r="4" fill="var(--agichat-bg)" opacity="0.35" />
+      <circle cx="48" cy="16" r="4" fill="var(--agichat-bg)" opacity="0.35" />
+      <ellipse cx="32" cy="35" rx="22" ry="20" fill="currentColor" />
+      <circle cx="24" cy="31" r="3" fill="var(--agichat-bg)" />
+      <circle cx="40" cy="31" r="3" fill="var(--agichat-bg)" />
+      <ellipse cx="32" cy="43" rx="9" ry="7" fill="var(--agichat-bg)" />
+      <ellipse cx="32" cy="40.5" rx="3.5" ry="2.5" fill="currentColor" />
     </svg>
   );
 }

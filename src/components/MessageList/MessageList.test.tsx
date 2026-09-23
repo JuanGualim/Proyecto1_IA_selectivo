@@ -13,18 +13,18 @@ const bot: ChatMessage = {
 };
 
 describe('MessageList', () => {
-  it('muestra bienvenida y sugerencias cuando está vacía', async () => {
+  it('muestra la introducción y las sugerencias cuando está vacía', async () => {
     const onSuggestion = vi.fn();
     render(
       <MessageList
         messages={[]}
         isResponding={false}
-        welcomeMessage="**Bienvenido**"
+        intro={<h2>Bienvenido</h2>}
         suggestions={['Uno', 'Dos']}
         onSuggestion={onSuggestion}
       />,
     );
-    expect(screen.getByText('Bienvenido')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Bienvenido' })).toBeInTheDocument();
     await userEvent.click(screen.getByRole('button', { name: 'Dos' }));
     expect(onSuggestion).toHaveBeenCalledWith('Dos');
   });

@@ -14,6 +14,7 @@ describe('defaultResponder', () => {
     ['dame código', '```ts'],
     ['una lista', '- [x]'],
     ['markdown', '# Encabezado'],
+    ['Hola quiero saber la respuesta del universo!', '**42**'],
   ])('responde a "%s" con Markdown', (input, expected) => {
     expect(content(input)).toContain(expected);
   });
