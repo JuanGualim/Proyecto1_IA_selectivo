@@ -24,7 +24,9 @@ export function ChatInput({
     const el = textareaRef.current;
     if (!el) return;
     el.style.height = 'auto';
-    el.style.height = `${Math.min(el.scrollHeight, MAX_HEIGHT_PX)}px`;
+    // Con box-sizing: border-box, scrollHeight no incluye el borde; se suma para evitar el scroll.
+    const border = el.offsetHeight - el.clientHeight;
+    el.style.height = `${Math.min(el.scrollHeight + border, MAX_HEIGHT_PX)}px`;
   };
 
   const submit = () => {
