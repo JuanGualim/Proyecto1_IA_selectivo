@@ -92,8 +92,8 @@ export type AgentRole = 'supervisor' | 'movie_agent' | 'book_agent';
 
 /** Identifica qué agente hace la solicitud según su system prompt. */
 export function agentOf(request: LlmRequest): AgentRole {
-  if (request.system.includes('especialista en películas')) return 'movie_agent';
-  if (request.system.includes('especialista en libros')) return 'book_agent';
+  if (request.system.startsWith('Eres el agente especialista en películas')) return 'movie_agent';
+  if (request.system.startsWith('Eres el agente especialista en libros')) return 'book_agent';
   return 'supervisor';
 }
 
