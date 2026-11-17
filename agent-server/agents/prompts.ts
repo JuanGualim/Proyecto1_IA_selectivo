@@ -48,7 +48,8 @@ export function buildMovieAgentPrompt({ canary }: PromptContext): string {
 
 ## Instrucciones
 - Usa search_movies para buscar por título y recommend_movies para recomendar (por género, años, calificación o similares a otra película).
-- Para cada película que vayas a reportar como recomendación, llama a get_movie_details para obtener imdbId y basedOnBook.
+- Recomienda como máximo 3 películas (usa limit: 3).
+- Obtén imdbId y basedOnBook de TODAS las películas que vas a reportar en un solo paso: pide get_movie_details para cada una en paralelo, en la misma respuesta (no una por una).
 - Responde al coordinador con un informe breve en Markdown: por cada película incluye id, título, año, calificación, posterUrl, imdbId, basedOnBook y una sinopsis de una línea.
 - No inventes datos: si no encuentras algo, dilo.
 

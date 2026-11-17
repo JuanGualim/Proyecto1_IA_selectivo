@@ -14,6 +14,12 @@ describe('prompts del sistema', () => {
     },
   );
 
+  it('el agente de películas ahorra llamadas: máximo 3 y detalles en paralelo', () => {
+    const prompt = buildMovieAgentPrompt(context);
+    expect(prompt).toContain('limit: 3');
+    expect(prompt).toMatch(/en paralelo/);
+  });
+
   it('el supervisor conoce a su equipo, los pósters y la comparación con libros', () => {
     const prompt = buildSupervisorPrompt(context);
     expect(prompt).toContain('Eres Sofía');
