@@ -168,6 +168,11 @@ function detect(text: string): Array<{ category: ThreatCategory; risk: 'medium' 
   return findings;
 }
 
+/** `true` si el texto contiene patrones de inyección (sirve también para datos externos). */
+export function containsThreat(text: string): boolean {
+  return detect(text).length > 0;
+}
+
 /** Analiza el mensaje del usuario y decide si se envía al agente. */
 export function inspectUserInput(raw: string): InputVerdict {
   const text = cleanText(raw).slice(0, MAX_INPUT_LENGTH);
