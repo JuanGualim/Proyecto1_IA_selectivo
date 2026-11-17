@@ -35,6 +35,7 @@ export default tseslint.config(
       'mock-server/**/*.ts',
       'mcp-servers/**/*.ts',
       'agent-server/**/*.ts',
+      'evals/**/*.ts',
       '*.config.{js,ts}',
     ],
     languageOptions: { globals: { ...globals.node } },
