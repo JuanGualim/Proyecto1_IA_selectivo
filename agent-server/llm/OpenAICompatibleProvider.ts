@@ -30,6 +30,11 @@ export interface OpenAICompatibleOptions {
   maxTokens?: number;
   /** Tiempo máximo por solicitud (ms). Por defecto 60 000. */
   timeoutMs?: number;
+  /**
+   * Esfuerzo de razonamiento para modelos que lo admiten (p. ej. `openai/gpt-oss-*` en Groq).
+   * Menos razonamiento = menos tokens consumidos del límite por minuto.
+   */
+  reasoningEffort?: 'low' | 'medium' | 'high';
   fetchImpl?: FetchLike;
 }
 
@@ -51,6 +56,7 @@ export class OpenAICompatibleProvider implements LlmProvider {
   private readonly model: string;
   private readonly maxTokens: number;
   private readonly timeoutMs: number;
+  private readonly reasoningEffort: OpenAICompatibleOptions['reasoningEffort'];
   private readonly fetchImpl: FetchLike;
 
   constructor(options: OpenAICompatibleOptions) {
@@ -60,6 +66,7 @@ export class OpenAICompatibleProvider implements LlmProvider {
     this.model = options.model ?? DEFAULT_GROQ_MODEL;
     this.maxTokens = options.maxTokens ?? 2048;
     this.timeoutMs = options.timeoutMs ?? 60_000;
+    this.reasoningEffort = options.reasoningEffort;
     this.fetchImpl = options.fetchImpl ?? fetch;
   }
 
@@ -68,6 +75,7 @@ export class OpenAICompatibleProvider implements LlmProvider {
       model: this.model,
       max_tokens: Math.min(request.maxTokens ?? this.maxTokens, this.maxTokens),
       temperature: 0.3,
+      ...(this.reasoningEffort ? { reasoning_effort: this.reasoningEffort } : {}),
       messages: [
         { role: 'system', content: request.system } satisfies ChatMessage,
         ...request.messages.flatMap(toChatMessages),

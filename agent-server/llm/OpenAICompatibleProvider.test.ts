@@ -246,3 +246,25 @@ describe('retry-after', () => {
     expect((await toLlmError(new Response('', { status: 429 }))).retryAfterMs).toBeUndefined();
   });
 });
+
+describe('reasoning_effort', () => {
+  it('se envía solo si se configura', async () => {
+    const fetchImpl = fakeFetch(
+      json(completion({ content: 'ok' })),
+      json(completion({ content: 'ok' })),
+    );
+    await new OpenAICompatibleProvider({ apiKey: 'k', fetchImpl, reasoningEffort: 'low' }).complete(
+      {
+        system: 's',
+        messages: [],
+      },
+    );
+    await new OpenAICompatibleProvider({ apiKey: 'k', fetchImpl }).complete({
+      system: 's',
+      messages: [],
+    });
+    const bodies = fetchImpl.mock.calls.map(([, init]) => JSON.parse(String(init?.body)));
+    expect(bodies[0]).toMatchObject({ reasoning_effort: 'low' });
+    expect(bodies[1]).not.toHaveProperty('reasoning_effort');
+  });
+});

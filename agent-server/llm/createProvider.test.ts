@@ -23,6 +23,24 @@ describe('createProvider', () => {
     );
   });
 
+  it('envía reasoning_effort solo a modelos gpt-oss', async () => {
+    const fetchSpy = vi.spyOn(globalThis, 'fetch').mockImplementation(
+      async () =>
+        new Response(JSON.stringify({ choices: [{ message: { content: 'ok' } }] }), {
+          status: 200,
+        }),
+    );
+    await createProvider(config({})).complete({ system: 's', messages: [] });
+    await createProvider(config({ model: 'qwen/qwen3.8-27b' })).complete({
+      system: 's',
+      messages: [],
+    });
+    const bodies = fetchSpy.mock.calls.map(([, init]) => JSON.parse(String(init?.body)));
+    expect(bodies[0]).toMatchObject({ reasoning_effort: 'low' });
+    expect(bodies[1]).not.toHaveProperty('reasoning_effort');
+    fetchSpy.mockRestore();
+  });
+
   it('Anthropic usa el SDK oficial', () => {
     expect(
       createProvider(config({ provider: 'anthropic', apiKey: 'sk-ant', baseUrl: undefined })),
