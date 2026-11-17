@@ -204,8 +204,8 @@ flowchart TB
     BOOK --> T1
     BOOK --> T2
     T1 & T2 -->|datos de terceros| SAN
-    SAN -->|"&lt;datos_externos&gt;"| MOV & BOOK
-    MOV & BOOK -->|"&lt;informe_especialista&gt;"| SUP
+    SAN -->|"bloque datos_externos"| MOV & BOOK
+    MOV & BOOK -->|"bloque informe_especialista"| SUP
     SUP -->|borrador| OG --> DET -->|"texto + open_url"| USER
 ```
 
