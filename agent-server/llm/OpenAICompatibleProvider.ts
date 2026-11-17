@@ -203,9 +203,11 @@ export async function toLlmError(response: Response): Promise<LlmError> {
     return new LlmError('El agente no tiene credenciales válidas para el modelo de lenguaje.');
   }
   if (status === 429) {
+    const seconds = Number(response.headers.get('retry-after'));
     return new LlmError(
       'El agente está recibiendo muchas solicitudes. Intenta en un momento.',
       true,
+      Number.isFinite(seconds) && seconds > 0 ? seconds * 1000 : undefined,
     );
   }
   if (status >= 500) return new LlmError('El modelo de lenguaje devolvió un error.', true);

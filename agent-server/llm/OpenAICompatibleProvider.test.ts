@@ -236,3 +236,13 @@ describe('toLlmError', () => {
     expect(error.retryable).toBe(retryable);
   });
 });
+
+describe('retry-after', () => {
+  it('lee la espera sugerida en los errores 429', async () => {
+    const error = await toLlmError(
+      new Response('', { status: 429, headers: { 'retry-after': '7' } }),
+    );
+    expect(error.retryAfterMs).toBe(7000);
+    expect((await toLlmError(new Response('', { status: 429 }))).retryAfterMs).toBeUndefined();
+  });
+});
