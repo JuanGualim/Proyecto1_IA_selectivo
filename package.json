@@ -41,7 +41,9 @@
     "mcp:tmdb": "node --env-file-if-exists=.env mcp-servers/tmdb/main.ts",
     "mcp:books": "node --env-file-if-exists=.env mcp-servers/books/main.ts",
     "mcp:navigator": "node --env-file-if-exists=.env mcp-servers/navigator/main.ts",
-    "agent-server": "node --env-file-if-exists=.env agent-server/main.ts"
+    "agent-server": "node --env-file-if-exists=.env agent-server/main.ts",
+    "evals": "node evals/main.ts",
+    "evals:live": "node --env-file-if-exists=.env evals/main.ts --live"
   },
   "peerDependencies": {
     "react": ">=18",
