@@ -42,8 +42,11 @@ npm run dev             # demo en http://localhost:5173/?transport=agent
 ```
 
 Sin llave de LLM puedes usar `LLM_PROVIDER=scripted` para probar la conexión y las guardias.
-El plan gratuito de Groq tiene límites por minuto: si se alcanzan, el agente espera y reintenta
-solo (la respuesta tarda un poco más). Si el navegador bloquea la pestaña que abre el agente, permite las ventanas emergentes
+El plan gratuito de Groq (modelo `openai/gpt-oss-120b`) permite unas 1000 solicitudes al día y
+8000 tokens por minuto. Cada mensaje hace varias llamadas al modelo (supervisor + especialistas),
+así que una respuesta tarda de 10 a 20 s; si escribes varios mensajes seguidos y se agota el
+minuto, el agente espera y reintenta solo (puede tardar 1–2 min). Revisa tus límites y los modelos
+activos en <https://console.groq.com/settings/limits>. Si el navegador bloquea la pestaña que abre el agente, permite las ventanas emergentes
 para el sitio (el widget deja el enlace para abrirla con un clic) o usa
 `NAVIGATOR_OPEN_ON_HOST=true` para que se abra en la máquina donde corre el agente.
 
