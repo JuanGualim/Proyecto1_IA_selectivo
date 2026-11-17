@@ -1,4 +1,5 @@
 import { useState, type CSSProperties, type KeyboardEvent } from 'react';
+import type { AttributionInfo } from '../../core/attribution';
 import type { ChatMessage } from '../../core/types';
 import { useChat } from '../../hooks/useChat';
 import type { ChatTransport } from '../../transports/ChatTransport';
@@ -31,6 +32,13 @@ export interface ChatWidgetProps {
   /** `floating` muestra el botón flotante; `inline` renderiza la ventana embebida en su contenedor. */
   mode?: 'floating' | 'inline';
   initialMessages?: ChatMessage[];
+  /** Pie con la atribución del proveedor de datos, p. ej. `TMDB_ATTRIBUTION`. */
+  attribution?: AttributionInfo;
+  /**
+   * Abre los sitios de referencia que pide el agente (evento `open_url`). Debe devolver
+   * `false` si no pudo abrirlos. Por defecto abre una pestaña nueva con `window.open`.
+   */
+  openUrl?: (url: string) => boolean;
   onOpenChange?: (open: boolean) => void;
 }
 
@@ -54,9 +62,11 @@ export function ChatWidget({
   defaultOpen = false,
   mode = 'floating',
   initialMessages,
+  attribution,
+  openUrl,
   onOpenChange,
 }: ChatWidgetProps) {
-  const chat = useChat(transport, initialMessages);
+  const chat = useChat(transport, initialMessages, { openUrl });
   const [isOpen, setIsOpen] = useState(defaultOpen || mode === 'inline');
   const [seenReplies, setSeenReplies] = useState(0);
   const replies = countAssistantReplies(chat.messages);
@@ -97,6 +107,7 @@ export function ChatWidget({
           avatarUrl={avatarUrl}
           placeholder={placeholder}
           suggestions={suggestions}
+          attribution={attribution}
           onClose={mode === 'floating' ? () => setOpen(false) : undefined}
         />
       )}

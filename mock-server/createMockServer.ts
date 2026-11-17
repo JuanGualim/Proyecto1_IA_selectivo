@@ -59,6 +59,9 @@ export function createMockServer(options: MockServerOptions = {}): Promise<MockS
 
       const id = `msg_${randomUUID()}`;
       send(socket, { type: 'message_start', id, replyTo: event.id });
+      for (const link of reply.links ?? []) {
+        send(socket, { type: 'open_url', id, url: link.url, label: link.label });
+      }
       for (const delta of chunkText(reply.content)) {
         send(socket, { type: 'message_delta', id, delta });
         await wait(chunkDelayMs);

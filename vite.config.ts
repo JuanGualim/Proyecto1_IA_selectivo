@@ -20,6 +20,7 @@ export default defineConfig({
       'mock-server/**/*.test.ts',
       'mcp-servers/**/*.test.ts',
       'agent-server/**/*.test.ts',
+      'evals/**/*.test.ts',
     ],
     css: false,
     coverage: {
@@ -30,6 +31,7 @@ export default defineConfig({
         'mock-server/**/*.ts',
         'mcp-servers/**/*.ts',
         'agent-server/**/*.ts',
+        'evals/**/*.ts',
       ],
       exclude: [
         'src/**/*.test.{ts,tsx}',
@@ -40,6 +42,7 @@ export default defineConfig({
         // Puntos de entrada (solo arrancan procesos; la lógica está en módulos probados).
         'mcp-servers/*/main.ts',
         'agent-server/main.ts',
+        'evals/main.ts',
         '**/*.test.ts',
         'src/embed.ts',
         'src/index.ts',

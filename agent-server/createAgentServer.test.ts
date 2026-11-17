@@ -92,10 +92,23 @@ describe('createAgentServer', () => {
     socket.close();
   });
 
-  it('agrega los enlaces abiertos y registra eventos de seguridad sin el contenido', async () => {
+  it('emite open_url antes del texto y registra eventos de seguridad sin el contenido', async () => {
     agent.handle.mockResolvedValueOnce(
       result('Abrí IMDb.', {
-        actions: [{ site: 'imdb', url: 'https://www.imdb.com/title/tt1160419/', label: 'IMDb' }],
+        actions: [
+          {
+            site: 'imdb',
+            url: 'https://www.imdb.com/title/tt1160419/',
+            label: 'IMDb',
+            openedOnHost: false,
+          },
+          {
+            site: 'google_books',
+            url: 'https://books.google.com/books?id=B1',
+            label: 'Google Books',
+            openedOnHost: true,
+          },
+        ],
         security: {
           input: { risk: 'medium', categories: ['role_hijack'] },
           outputReasons: ['untrusted_urls_removed'],
@@ -107,9 +120,19 @@ describe('createAgentServer', () => {
     const done = collect(socket, (event) => event.type === 'message_end');
     socket.send(userMessage('u1', 'secreto del usuario'));
 
-    expect(textOf(await done)).toBe(
-      'Abrí IMDb.\n\n🔗 [IMDb](https://www.imdb.com/title/tt1160419/)',
-    );
+    const events = await done;
+    expect(textOf(events)).toBe('Abrí IMDb.');
+    const id = events[0]?.type === 'message_start' ? events[0].id : '';
+    expect(events.slice(1, 3)).toEqual([
+      { type: 'open_url', id, url: 'https://www.imdb.com/title/tt1160419/', label: 'IMDb' },
+      {
+        type: 'open_url',
+        id,
+        url: 'https://books.google.com/books?id=B1',
+        label: 'Google Books',
+        openedByServer: true,
+      },
+    ]);
     expect(log).toHaveBeenCalledWith(expect.stringContaining('entrada=role_hijack'));
     expect(log.mock.calls.flat().join()).not.toContain('secreto del usuario');
     socket.close();

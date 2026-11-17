@@ -1,3 +1,4 @@
+import { buildReferenceLink, type ReferenceSite } from '../../src/core/references.ts';
 import type { ToolExecutor } from '../agents/specialists.ts';
 import type { LlmRequest, LlmResponse, ToolDefinition } from '../llm/LlmProvider.ts';
 import type { ToolCallOutcome } from '../mcp/McpToolbox.ts';
@@ -60,17 +61,23 @@ export class FakeTools implements ToolExecutor {
     search_books: () => ok('books', { books: [DUNE_BOOK] }),
     get_book_details: () => ok('books', { book: DUNE_BOOK }),
     find_book_for_movie: () => ok('books', { candidates: [DUNE_BOOK], likelyHasBook: true }),
-    open_reference: (input) =>
-      ok('navigator', {
-        action: 'open_url',
-        site: input.site,
-        url:
-          input.site === 'imdb'
-            ? `https://www.imdb.com/title/${String(input.id)}/`
-            : `https://books.google.com/books?id=${String(input.id)}`,
-        label: input.site === 'imdb' ? 'IMDb' : 'Google Books',
-        openedOnHost: false,
-      }),
+    // Misma lógica que el servidor MCP real: solo enlaces construidos desde ids válidos.
+    open_reference: (input) => {
+      const link = buildReferenceLink({
+        site: input.site as ReferenceSite,
+        id: typeof input.id === 'string' ? input.id : undefined,
+        query: typeof input.query === 'string' ? input.query : undefined,
+      });
+      if (!link) {
+        return {
+          content: 'Datos no válidos.',
+          isError: true,
+          structured: null,
+          server: 'navigator',
+        };
+      }
+      return ok('navigator', { action: 'open_url', ...link, openedOnHost: false });
+    },
   };
 
   definitions(names?: readonly string[]): ToolDefinition[] {

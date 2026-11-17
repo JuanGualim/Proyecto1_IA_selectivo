@@ -9,8 +9,12 @@ export type {
   ChatWidgetTheme,
 } from './components/ChatWidget/ChatWidget';
 export { MarkdownContent } from './components/MarkdownContent/MarkdownContent';
-export { useChat } from './hooks/useChat';
-export type { UseChatResult } from './hooks/useChat';
+export { useChat, openInNewTab } from './hooks/useChat';
+export type { UseChatResult, UseChatOptions } from './hooks/useChat';
+export { TMDB_ATTRIBUTION } from './core/attribution';
+export type { AttributionInfo } from './core/attribution';
+export { isAllowedReferenceUrl, buildReferenceLink } from './core/references';
+export { isAllowedImageUrl, DEFAULT_IMAGE_HOSTS } from './core/media';
 export { mountChatWidget } from './sdk/mountChatWidget';
 export type { MountOptions, MountedWidget } from './sdk/mountChatWidget';
 export * from './transports';

@@ -6,10 +6,12 @@ que trabajen en este repositorio. Los humanos también deberían leerlo.
 ## Proyecto
 
 SDK de un widget de chat agéntico (React 19 + TypeScript + Vite) para la startup AGIChat.
-Fase 1: la UI se conecta a un backend **simulado** (mock). Fase 2: se conectará a un agente real
-**sin cambiar la UI**, solo cambiando el adaptador de transporte.
+Proyecto #1: la UI se conecta a un backend **simulado** (mock). Proyecto #2: un **agente real**
+multiagente de películas (`agent-server/`) con herramientas en **servidores MCP**
+(`mcp-servers/`), reforzado contra OWASP LLM01 y LLM07 y con evals (`evals/`).
 
-Lee [`docs/ARQUITECTURA.md`](docs/ARQUITECTURA.md) antes de hacer cambios estructurales.
+Lee [`docs/ARQUITECTURA.md`](docs/ARQUITECTURA.md), [`docs/AGENTE.md`](docs/AGENTE.md) y
+[`docs/SEGURIDAD_Y_EVALS.md`](docs/SEGURIDAD_Y_EVALS.md) antes de hacer cambios estructurales.
 
 ## Comandos
 
@@ -17,6 +19,8 @@ Lee [`docs/ARQUITECTURA.md`](docs/ARQUITECTURA.md) antes de hacer cambios estruc
 npm install            # instalar dependencias (Node >= 22.18, ver .nvmrc)
 npm run dev            # demo en http://localhost:5173
 npm run mock-server    # servidor WebSocket simulado en ws://127.0.0.1:8787
+npm run agent-server   # agente real en ws://127.0.0.1:8788 (requiere .env, ver .env.example)
+npm run evals          # evals sin red (funcionales, LLM01, LLM07); evals:live usa el modelo real
 npm run lint           # ESLint, 0 advertencias permitidas
 npm run format         # Prettier (escribe); format:check solo verifica
 npm run typecheck      # tsc --noEmit
@@ -36,6 +40,10 @@ src/hooks       → useChat: une transporte + reducer.
 src/components  → UI React; solo recibe props / usa hooks.
 src/sdk, src/index.ts, src/embed.ts → API pública.
 mock-server/    → servidor WebSocket simulado (Node), reutiliza core/protocol y mock/responder.
+agent-server/   → agente real (Node): llm/ (puerto + adaptadores), agents/ (orquestador,
+                  supervisor, especialistas), mcp/ (cliente MCP), security/ (guardias).
+mcp-servers/    → servidores MCP independientes (tmdb, books, navigator).
+evals/          → casos, modelo peor caso, evaluador y reportes.
 demo/           → app de ejemplo; NO es parte del SDK.
 ```
 
@@ -51,6 +59,13 @@ Reglas estrictas:
 - Cualquier cambio al protocolo requiere actualizar: `protocol.ts` (+ `parseServerEvent`),
   `chatReducer.ts`, `mock-server/`, sus tests y la tabla del protocolo en `docs/ARQUITECTURA.md`.
 - Lo exportado en `src/index.ts` es API pública: no lo rompas sin avisarlo en el PR.
+- `agent-server/`, `mcp-servers/` y `evals/` se ejecutan con Node directamente (type stripping):
+  importa con extensión `.ts`, sin `enum`, `namespace` ni parámetros de constructor con
+  modificadores. Desde `src/` solo pueden importar módulos sin imports de valores
+  (`core/protocol.ts`, `core/references.ts`, `core/attribution.ts`, `core/media.ts`, `mock/responder.ts`).
+- Los agentes dependen del puerto `LlmProvider`, nunca de un SDK de LLM concreto.
+- Los servidores MCP no conocen al agente: devuelven datos (y acciones como `open_url`), no
+  deciden qué mostrar. Cada uno recibe solo sus credenciales (`agent-server/mcp/stdioServers.ts`).
 
 ## Recetas frecuentes
 
@@ -69,6 +84,18 @@ Reglas estrictas:
 3. Colores solo mediante variables `--agichat-*` (soportan tema claro/oscuro).
 
 **Agregar un tipo de evento del agente:** protocolo → reducer (+ tests) → UI (+ tests) → docs.
+
+**Agregar una herramienta MCP:**
+
+1. Cliente de la API en `mcp-servers/<servidor>/` (con `fetch` inyectable y tests sin red).
+2. `server.registerTool(...)` con esquema `zod`, `annotations` (`readOnlyHint`, …) y
+   `safeTool` para que los errores no expongan detalles internos.
+3. Agrega el nombre a la lista del especialista que la usará (`agents/specialists.ts`).
+4. Si devuelve texto de terceros, ya pasa por `prepareToolOutput`; agrega un caso de inyección
+   indirecta en `evals/cases.ts`.
+
+**Agregar un caso de eval:** agrégalo en `evals/cases.ts` con sus verificaciones (`Check`). Si es
+un ataque marca `attack: true`. `npm run evals` y el CI deben seguir en 100 %.
 
 ## Convenciones de código
 
@@ -105,6 +132,14 @@ Reglas estrictas:
 - Antes de dar una tarea por terminada: `npm run ci` debe pasar completo.
 - Abre un PR hacia `main` usando la plantilla; requiere los checks de CI en verde y revisión
   (aprobación de otro integrante, o autorrevisión mientras haya un solo desarrollador).
+
+## Seguridad del agente (OWASP LLM01 / LLM07)
+
+- Nunca pongas secretos en los prompts; las llaves viven en los servidores MCP.
+- El texto de terceros (TMDB, Google Books) siempre pasa por `prepareToolOutput`.
+- No aceptes URLs del modelo para navegar: usa `buildReferenceLink` / `isAllowedReferenceUrl`.
+- Toda respuesta final pasa por `inspectOutput` (canario, fragmentos del prompt, URLs).
+- Las opciones `defenses` del orquestador son SOLO para evals de ablación.
 
 ## No hacer
 

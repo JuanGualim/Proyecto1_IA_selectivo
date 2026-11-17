@@ -25,6 +25,7 @@
     "mock-server",
     "mcp-servers",
     "agent-server",
+    "evals",
     "vite.config.ts",
     "vite.lib.config.ts"
   ]

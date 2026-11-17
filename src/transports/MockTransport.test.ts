@@ -59,6 +59,21 @@ describe('MockTransport', () => {
     expect(ids.size).toBe(1);
   });
 
+  it('emite open_url después de message_start si la respuesta abre un sitio', () => {
+    const url = 'https://www.imdb.com/title/tt1160419/';
+    const { transport, events } = setup({
+      responder: () => ({ content: 'listo', links: [{ url, label: 'IMDb' }] }),
+    });
+    transport.connect();
+    vi.advanceTimersByTime(10);
+    transport.send({ type: 'user_message', id: 'u1', content: 'abre' });
+    vi.advanceTimersByTime(1000);
+    expect(events[1]).toMatchObject({ type: 'open_url', url, label: 'IMDb' });
+    expect(events[1]?.type === 'open_url' && events[1].id).toBe(
+      events[0]?.type === 'message_start' ? events[0].id : null,
+    );
+  });
+
   it('emite un error cuando el responder falla', () => {
     const { transport, events } = setup({ responder: () => ({ error: 'boom' }) });
     transport.connect();

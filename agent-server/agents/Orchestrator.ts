@@ -25,6 +25,18 @@ export interface OrchestratorOptions {
   assistantName?: string;
   /** Turnos previos que se envían como contexto. Por defecto 10. */
   historyLimit?: number;
+  /**
+   * Defensas activas (todas por defecto). Desactivarlas SOLO tiene sentido en las evals de
+   * ablación, para medir cuánto aporta cada capa. La lista permitida de sitios no se puede
+   * desactivar: es una restricción estructural.
+   */
+  defenses?: Partial<Defenses>;
+}
+
+export interface Defenses {
+  inputGuard: boolean;
+  outputGuard: boolean;
+  toolSanitization: boolean;
 }
 
 export interface TurnResult {
@@ -97,6 +109,7 @@ export class Orchestrator {
   private readonly canary: string;
   private readonly assistantName: string;
   private readonly historyLimit: number;
+  private readonly defenses: Defenses;
   private readonly systemPrompt: string;
   private readonly allPrompts: string[];
 
@@ -106,6 +119,12 @@ export class Orchestrator {
     this.canary = options.canary;
     this.assistantName = options.assistantName ?? 'Sofía';
     this.historyLimit = options.historyLimit ?? 10;
+    this.defenses = {
+      inputGuard: true,
+      outputGuard: true,
+      toolSanitization: true,
+      ...options.defenses,
+    };
     const prompt = { assistantName: this.assistantName, canary: this.canary };
     this.systemPrompt = buildSupervisorPrompt(prompt);
     this.allPrompts = [
@@ -116,7 +135,10 @@ export class Orchestrator {
   }
 
   async handle(history: ConversationTurn[], userText: string): Promise<TurnResult> {
-    const input = inspectUserInput(userText);
+    const verdict = inspectUserInput(userText);
+    const input = this.defenses.inputGuard
+      ? verdict
+      : { ...verdict, allowed: true, risk: 'none' as const, text: userText };
     const context = new TurnContext();
     const security = { risk: input.risk, categories: input.categories };
 
@@ -154,7 +176,9 @@ export class Orchestrator {
     });
 
     const draft = result.stopReason === 'refusal' || !result.text ? FALLBACK_TEXT : result.text;
-    const output = inspectOutput(draft, { canary: this.canary, systemPrompts: this.allPrompts });
+    const output = this.defenses.outputGuard
+      ? inspectOutput(draft, { canary: this.canary, systemPrompts: this.allPrompts })
+      : { text: draft, leaked: false, reasons: [] };
     const text = output.leaked ? output.text : this.complete(output.text, context);
 
     return {
@@ -182,6 +206,7 @@ export class Orchestrator {
           provider: this.provider,
           tools: this.tools,
           prompt: { assistantName: this.assistantName, canary: this.canary },
+          sanitize: this.defenses.toolSanitization,
         },
         context,
       );

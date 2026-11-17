@@ -1,5 +1,6 @@
 import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { TMDB_ATTRIBUTION } from '../../core/attribution';
 import { FakeTransport } from '../../test/FakeTransport';
 import { MockTransport } from '../../transports/MockTransport';
 import { ChatWidget } from './ChatWidget';
@@ -141,5 +142,37 @@ describe('ChatWidget', () => {
       expect(screen.getAllByTestId('message-user')).toHaveLength(1);
       expect(screen.queryByRole('alert')).toBeNull();
     });
+  });
+
+  it('muestra la atribución y abre los sitios que pide el agente', async () => {
+    const transport = new FakeTransport();
+    const openUrl = vi.fn(() => true);
+    render(
+      <ChatWidget
+        transport={transport}
+        mode="inline"
+        attribution={TMDB_ATTRIBUTION}
+        openUrl={openUrl}
+      />,
+    );
+    expect(screen.getByRole('img', { name: 'The Movie Database (TMDB)' })).toBeInTheDocument();
+
+    await userEvent.type(screen.getByRole('textbox'), 'Abre IMDb{Enter}');
+    act(() => {
+      transport.serverEmit({ type: 'message_start', id: 'a1' });
+      transport.serverEmit({
+        type: 'open_url',
+        id: 'a1',
+        url: 'https://www.imdb.com/title/tt1160419/',
+        label: 'IMDb',
+      });
+      transport.serverEmit({ type: 'message_delta', id: 'a1', delta: 'Listo.' });
+      transport.serverEmit({ type: 'message_end', id: 'a1' });
+    });
+
+    expect(openUrl).toHaveBeenCalledWith('https://www.imdb.com/title/tt1160419/');
+    expect(
+      screen.getByRole('link', { name: /Abrí en una pestaña nueva: IMDb/ }),
+    ).toBeInTheDocument();
   });
 });

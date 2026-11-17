@@ -41,6 +41,8 @@ export interface SpecialistDeps {
   tools: ToolExecutor;
   prompt: PromptContext;
   maxSteps?: number;
+  /** Sanitizar y delimitar la salida de las herramientas (por defecto `true`). */
+  sanitize?: boolean;
 }
 
 /**
@@ -72,6 +74,7 @@ export async function runSpecialist(
       context.toolCalls += 1;
       const outcome = await deps.tools.call(call.name, call.input);
       if (!outcome.isError) context.record(outcome.structured);
+      if (deps.sanitize === false) return { content: outcome.content, isError: outcome.isError };
       const prepared = prepareToolOutput(outcome.server || definition.name, outcome.content);
       if (prepared.flagged) context.indirectInjection = true;
       return { content: prepared.content, isError: outcome.isError };
