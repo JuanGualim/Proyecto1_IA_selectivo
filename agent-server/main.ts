@@ -1,9 +1,7 @@
 import { Orchestrator } from './agents/Orchestrator.ts';
 import { ConfigError, loadConfig } from './config.ts';
 import { createAgentServer } from './createAgentServer.ts';
-import { AnthropicProvider } from './llm/AnthropicProvider.ts';
-import type { LlmProvider } from './llm/LlmProvider.ts';
-import { ScriptedProvider, textResponse } from './llm/ScriptedProvider.ts';
+import { createProvider, describeProvider } from './llm/createProvider.ts';
 import { McpToolbox } from './mcp/McpToolbox.ts';
 import { createStdioSpecs } from './mcp/stdioServers.ts';
 import { createCanary } from './security/outputGuard.ts';
@@ -21,18 +19,12 @@ try {
   throw error;
 }
 
-const provider: LlmProvider =
-  config.llm.provider === 'anthropic'
-    ? new AnthropicProvider({
-        model: config.llm.model,
-        effort: config.llm.effort,
-        apiKey: config.llm.apiKey,
-      })
-    : new ScriptedProvider(() =>
-        textResponse(
-          'Estoy en **modo sin modelo** (`LLM_PROVIDER=scripted`): la conexión y las guardias funcionan, pero no puedo razonar. Configura `ANTHROPIC_API_KEY` para activar al agente.',
-        ),
-      );
+const provider = createProvider(config.llm, {
+  onRetry: (attempt, delayMs) =>
+    console.error(
+      `[llm] límite alcanzado, reintento ${attempt} en ${Math.round(delayMs / 1000)} s`,
+    ),
+});
 
 const toolbox = await McpToolbox.connect(createStdioSpecs(process.env));
 const agent = new Orchestrator({
@@ -51,7 +43,7 @@ const server = await createAgentServer({
 
 console.error(
   `🎬 Agente de AGIChat escuchando en ws://${config.host}:${server.port} ` +
-    `(LLM: ${provider.name}, herramientas MCP: ${toolbox.definitions().length})`,
+    `(LLM: ${describeProvider(config.llm)}, herramientas MCP: ${toolbox.definitions().length})`,
 );
 
 const shutdown = () => {
