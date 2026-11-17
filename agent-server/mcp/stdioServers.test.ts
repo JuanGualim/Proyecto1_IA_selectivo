@@ -28,6 +28,8 @@ describe('stdioServerParams', () => {
     });
     expect(books?.params.env).toEqual({ PATH: '/bin', GOOGLE_BOOKS_API_KEY: 'books-secret' });
     expect(navigator?.params.env).toEqual({ PATH: '/bin' });
+    const [, , withHost] = stdioServerParams({ NAVIGATOR_OPEN_ON_HOST: 'true' }, {});
+    expect(withHost?.params.env).toEqual({ NAVIGATOR_OPEN_ON_HOST: 'true' });
     const all = JSON.stringify([tmdb, books, navigator]);
     expect(all).not.toContain('llm-secret');
   });

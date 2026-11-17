@@ -10,7 +10,7 @@ import type { McpServerSpec } from './McpToolbox.ts';
 const SERVERS: Array<{ name: string; entry: string; envKeys: string[] }> = [
   { name: 'tmdb', entry: 'tmdb/main.ts', envKeys: ['TMDB_API_KEY', 'TMDB_LANGUAGE'] },
   { name: 'books', entry: 'books/main.ts', envKeys: ['GOOGLE_BOOKS_API_KEY'] },
-  { name: 'navigator', entry: 'navigator/main.ts', envKeys: [] },
+  { name: 'navigator', entry: 'navigator/main.ts', envKeys: ['NAVIGATOR_OPEN_ON_HOST'] },
 ];
 
 const MCP_ROOT = fileURLToPath(new URL('../../mcp-servers/', import.meta.url));
