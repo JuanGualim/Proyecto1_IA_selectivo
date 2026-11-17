@@ -6,7 +6,7 @@ import { RetryingProvider } from './RetryingProvider.ts';
 
 const config = (overrides: Partial<LlmConfig>): LlmConfig => ({
   provider: 'groq',
-  model: 'llama-3.3-70b-versatile',
+  model: 'openai/gpt-oss-120b',
   effort: 'low',
   apiKey: 'gsk_x',
   baseUrl: 'https://api.groq.com/openai/v1',
@@ -39,7 +39,7 @@ describe('createProvider', () => {
   });
 
   it('describe el proveedor para los registros', () => {
-    expect(describeProvider(config({}))).toBe('groq · llama-3.3-70b-versatile');
+    expect(describeProvider(config({}))).toBe('groq · openai/gpt-oss-120b');
     expect(describeProvider(config({ provider: 'scripted' }))).toBe('scripted');
   });
 });

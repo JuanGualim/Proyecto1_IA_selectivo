@@ -17,7 +17,8 @@ import {
  */
 
 export const GROQ_BASE_URL = 'https://api.groq.com/openai/v1';
-export const DEFAULT_GROQ_MODEL = 'llama-3.3-70b-versatile';
+/** Modelo por defecto en Groq: buen uso de herramientas y disponible en el plan gratuito. */
+export const DEFAULT_GROQ_MODEL = 'openai/gpt-oss-120b';
 
 export type FetchLike = (input: string, init?: RequestInit) => Promise<Response>;
 
