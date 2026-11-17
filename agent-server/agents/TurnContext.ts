@@ -21,6 +21,8 @@ export interface OpenUrlAction {
   site: ReferenceSite;
   url: string;
   label: string;
+  /** El servidor MCP ya abrió la pestaña en la máquina anfitriona. */
+  openedOnHost: boolean;
 }
 
 /** Máximo de pestañas que el agente puede abrir por mensaje (agencia limitada). */
@@ -89,7 +91,12 @@ export class TurnContext {
     if (this.actions.length >= MAX_OPEN_ACTIONS || this.actions.some((a) => a.url === url)) {
       return false;
     }
-    this.actions.push({ site, url, label: str(structured.label) ?? url });
+    this.actions.push({
+      site,
+      url,
+      label: str(structured.label) ?? url,
+      openedOnHost: structured.openedOnHost === true,
+    });
     return true;
   }
 

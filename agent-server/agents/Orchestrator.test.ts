@@ -98,7 +98,12 @@ describe('Orchestrator', () => {
     const result = await orchestrator.handle([], 'Ábreme IMDb de Dune');
 
     expect(result.actions).toEqual([
-      { site: 'imdb', url: 'https://www.imdb.com/title/tt1160419/', label: 'IMDb' },
+      {
+        site: 'imdb',
+        url: 'https://www.imdb.com/title/tt1160419/',
+        label: 'IMDb',
+        openedOnHost: false,
+      },
     ]);
     expect(tools.calls).toEqual([
       { name: 'open_reference', input: { site: 'imdb', id: 'tt1160419' } },

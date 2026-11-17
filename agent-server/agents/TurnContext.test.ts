@@ -75,6 +75,18 @@ describe('TurnContext', () => {
     );
     expect(context.actions).toHaveLength(MAX_OPEN_ACTIONS);
     expect(context.actions[1]?.label).toBe('https://books.google.com/books?id=B1');
+    expect(context.actions.map((action) => action.openedOnHost)).toEqual([false, false]);
+  });
+
+  it('registra si la pestaña ya se abrió en la máquina anfitriona', () => {
+    const context = new TurnContext();
+    context.addOpenAction({
+      action: 'open_url',
+      site: 'imdb',
+      url: 'https://www.imdb.com/title/tt1160419/',
+      openedOnHost: true,
+    });
+    expect(context.actions[0]?.openedOnHost).toBe(true);
   });
 
   it('encuentra las películas mencionadas en el texto', () => {

@@ -36,13 +36,6 @@ function send(socket: WebSocket, event: ServerEvent): void {
   if (socket.readyState === socket.OPEN) socket.send(JSON.stringify(event));
 }
 
-/** Agrega los enlaces abiertos al texto para que el usuario también pueda hacer clic. */
-function withLinks(result: TurnResult): string {
-  if (result.actions.length === 0) return result.text;
-  const links = result.actions.map((action) => `[${action.label}](${action.url})`).join(' · ');
-  return `${result.text}\n\n🔗 ${links}`;
-}
-
 /**
  * Servidor WebSocket del agente real. Habla el mismo protocolo que el servidor mock
  * (`src/core/protocol.ts`), por lo que el widget se conecta sin cambios con `WebSocketTransport`.
@@ -117,7 +110,7 @@ export function createAgentServer(options: AgentServerOptions): Promise<AgentSer
               `salida=${result.security.outputReasons.join(',') || '-'} indirecta=${result.security.indirectInjection}`,
           );
         }
-        const text = withLinks(result);
+        const { text } = result;
         history.push(
           { role: 'user', content: event.content },
           { role: 'assistant', content: text },
@@ -126,6 +119,16 @@ export function createAgentServer(options: AgentServerOptions): Promise<AgentSer
 
         const id = `msg_${randomUUID()}`;
         send(socket, { type: 'message_start', id, replyTo: event.id });
+        // Primero las pestañas: el widget las abre sin que el usuario haga clic.
+        for (const action of result.actions) {
+          send(socket, {
+            type: 'open_url',
+            id,
+            url: action.url,
+            label: action.label,
+            ...(action.openedOnHost ? { openedByServer: true } : {}),
+          });
+        }
         for (const delta of chunkText(text)) {
           send(socket, { type: 'message_delta', id, delta });
           if (chunkDelayMs > 0) await wait(chunkDelayMs);
