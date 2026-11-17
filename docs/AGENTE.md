@@ -25,58 +25,56 @@ nueva. Las herramientas están abstraídas en **servidores MCP** reutilizables p
 
 ## 2. Diagrama de arquitectura de alto nivel
 
+Vista general del sistema: muestra **los bloques principales y cómo se comunican**, sin detalles
+de implementación. La organización interna de los agentes (supervisor, especialistas, guardias)
+está en la [sección 6](#6-arquitectura-de-bajo-nivel-organización-de-los-agentes).
+
 ```mermaid
-flowchart LR
-    subgraph Browser["Navegador del usuario (sitio de Maxine)"]
-        WIDGET["Widget AGIChat (SDK React)<br/>ChatWidget · useChat · WebSocketTransport"]
-        TAB["Pestaña nueva<br/>IMDb / Google Books"]
+flowchart TB
+    USER(["Usuario"])
+
+    subgraph Cliente["Capa de cliente"]
+        direction LR
+        CDN["Hosting estático / CDN"]
+        WIDGET["Widget de chat AGIChat<br/>(en el sitio web de Maxine)"]
     end
 
-    subgraph Backend["Backend del agente (Node.js) — escalable horizontalmente"]
-        LB["Balanceador / proxy WSS<br/>(TLS, sesiones fijas)"]
-        subgraph Instance["Instancia de agent-server (N réplicas)"]
-            WS["Servidor WebSocket<br/>origen permitido · límite de mensajes"]
-            ORCH["Orquestador multiagente<br/>guardias + supervisor + especialistas"]
-            LLMPORT{{"Puerto LlmProvider"}}
-            MCPC["McpToolbox<br/>(cliente MCP)"]
-        end
-        subgraph MCP["Servidores MCP (procesos independientes)"]
-            MTMDB["mcp-servers/tmdb"]
-            MBOOKS["mcp-servers/books"]
-            MNAV["mcp-servers/navigator"]
-        end
+    subgraph Backend["Backend de AGIChat"]
+        direction LR
+        LB["Balanceador de carga"]
+        AGENT["Servicio del agente<br/>(sistema multiagente + seguridad)<br/>N réplicas"]
+        TOOLS["Servicios de herramientas<br/>(servidores MCP)"]
+        OTHER["Otros agentes de Maxine"]
     end
 
-    subgraph External["Servicios externos"]
-        LLMAPI["Modelo de lenguaje<br/>Groq (por defecto, gratis)<br/>o NVIDIA · Gemini · Claude"]
-        TMDB["TMDB API v3<br/>+ image.tmdb.org"]
-        GBOOKS["Google Books API v1"]
+    subgraph Externos["Servicios externos"]
+        direction LR
+        LLM["Modelo de lenguaje<br/>(Groq)"]
+        MOVIES["Datos de películas<br/>(TMDB)"]
+        BOOKS["Datos de libros<br/>(Google Books)"]
+        SITES["Sitios de referencia<br/>(IMDb, Google Books)"]
     end
 
-    OTHER["Otros agentes / clientes MCP<br/>(p. ej. Claude Desktop)"]
-
-    WIDGET <-- "JSON por WebSocket<br/>user_message · message_* · open_url" --> LB --> WS
-    WS --> ORCH
-    ORCH --> LLMPORT -->|"OpenAICompatibleProvider + reintentos<br/>(o AnthropicProvider)"| LLMAPI
-    ORCH --> MCPC
-    MCPC <-- "MCP (stdio)" --> MTMDB & MBOOKS & MNAV
-    MTMDB --> TMDB
-    MBOOKS --> GBOOKS
-    WIDGET -- "window.open (open_url)" --> TAB
-    WIDGET -. "pósters" .-> TMDB
-    OTHER -. "MCP" .-> MTMDB & MBOOKS & MNAV
+    USER --> WIDGET
+    CDN -->|"descarga el widget"| WIDGET
+    WIDGET <-->|"mensajes en tiempo real"| LB
+    LB --> AGENT
+    AGENT -->|"usa herramientas"| TOOLS
+    OTHER -.->|"reutilizan"| TOOLS
+    AGENT -->|"razonamiento"| LLM
+    TOOLS --> MOVIES
+    TOOLS --> BOOKS
+    WIDGET -->|"abre una pestaña"| SITES
 ```
 
-### Componentes
-
-| Componente                  | Carpeta             | Responsabilidad                                                                                                                                                                                                     |
-| --------------------------- | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Widget (SDK)                | `src/`              | UI del chat; abre las pestañas pedidas (`open_url`), muestra pósters seguros y la atribución de TMDB.                                                                                                               |
-| Servidor del agente         | `agent-server/`     | WebSocket, orquestación multiagente, guardias de seguridad, configuración.                                                                                                                                          |
-| Puerto + adaptadores de LLM | `agent-server/llm/` | `LlmProvider` (puerto), `OpenAICompatibleProvider` (Groq por defecto; NVIDIA, Gemini, …), `RetryingProvider` (reintentos ante límites), `AnthropicProvider` (Claude, opcional), `ScriptedProvider` (tests y evals). |
-| Cliente MCP                 | `agent-server/mcp/` | `McpToolbox` descubre las herramientas de los servidores MCP y enruta las llamadas.                                                                                                                                 |
-| Servidores MCP              | `mcp-servers/`      | Herramientas reutilizables: TMDB, Google Books y navegación.                                                                                                                                                        |
-| Evals                       | `evals/`            | Casos funcionales y de ataques, evaluador, reporte y ablación.                                                                                                                                                      |
+| Bloque                    | Responsabilidad                                                                                             |
+| ------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| Widget de chat            | Interfaz del usuario: envía mensajes, muestra respuestas y pósters, abre IMDb o Google Books.               |
+| Hosting estático / CDN    | Sirve el widget como archivos estáticos; no consume recursos del backend.                                   |
+| Balanceador de carga      | Reparte las conexiones entre las réplicas del servicio del agente.                                          |
+| Servicio del agente       | Sistema multiagente que entiende la petición, decide qué herramientas usar, aplica la seguridad y responde. |
+| Servicios de herramientas | Acceso a películas, libros y navegación mediante servidores MCP, reutilizables por otros agentes.           |
+| Servicios externos        | Modelo de lenguaje y fuentes de datos (TMDB, Google Books) a los que se accede por API.                     |
 
 ## 3. ¿Por qué escala?
 
@@ -146,6 +144,17 @@ ejecuta el agente en la misma máquina con `NAVIGATOR_OPEN_ON_HOST=true` (el ser
 pestaña con el navegador predeterminado y el widget no la duplica).
 
 ## 6. Arquitectura de bajo nivel: organización de los agentes
+
+### Componentes internos
+
+| Componente                  | Carpeta             | Responsabilidad                                                                                                                                                                                                     |
+| --------------------------- | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Widget (SDK)                | `src/`              | UI del chat; abre las pestañas pedidas (`open_url`), muestra pósters seguros y la atribución de TMDB.                                                                                                               |
+| Servidor del agente         | `agent-server/`     | WebSocket, orquestación multiagente, guardias de seguridad, configuración.                                                                                                                                          |
+| Puerto + adaptadores de LLM | `agent-server/llm/` | `LlmProvider` (puerto), `OpenAICompatibleProvider` (Groq por defecto; NVIDIA, Gemini, …), `RetryingProvider` (reintentos ante límites), `AnthropicProvider` (Claude, opcional), `ScriptedProvider` (tests y evals). |
+| Cliente MCP                 | `agent-server/mcp/` | `McpToolbox` descubre las herramientas de los servidores MCP y enruta las llamadas.                                                                                                                                 |
+| Servidores MCP              | `mcp-servers/`      | Herramientas reutilizables: TMDB, Google Books y navegación.                                                                                                                                                        |
+| Evals                       | `evals/`            | Casos funcionales y de ataques, evaluador, reporte y ablación.                                                                                                                                                      |
 
 ### Clasificación
 
