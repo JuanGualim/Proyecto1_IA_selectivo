@@ -4,3 +4,4 @@
  */
 export { mountChatWidget } from './sdk/mountChatWidget';
 export { MockTransport, WebSocketTransport, createTransport } from './transports';
+export { TMDB_ATTRIBUTION } from './core/attribution';

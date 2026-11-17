@@ -1,11 +1,11 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
+import { TMDB_ATTRIBUTION as TMDB_NOTICE } from '../../src/core/attribution.ts';
 import { safeTool } from '../shared/toolResult.ts';
 import type { TmdbClient } from './tmdbClient.ts';
 
 /** Atribución exigida por los términos de uso de la API de TMDB. */
-export const TMDB_ATTRIBUTION =
-  'This product uses the TMDB API but is not endorsed or certified by TMDB.';
+export const TMDB_ATTRIBUTION = TMDB_NOTICE.text;
 
 export type TmdbApi = Pick<
   TmdbClient,
