@@ -19,5 +19,13 @@
     "types": ["vite/client", "vitest/globals", "@testing-library/jest-dom", "node"],
     "noEmit": true
   },
-  "include": ["src", "demo", "mock-server", "vite.config.ts", "vite.lib.config.ts"]
+  "include": [
+    "src",
+    "demo",
+    "mock-server",
+    "mcp-servers",
+    "agent-server",
+    "vite.config.ts",
+    "vite.lib.config.ts"
+  ]
 }
