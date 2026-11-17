@@ -38,6 +38,20 @@ export interface MessageEndEvent {
   id: string;
 }
 
+/**
+ * El agente pide abrir un sitio de referencia (IMDb o Google Books) en una pestaña nueva,
+ * sin que el usuario haga clic. `id` es el mensaje de respuesta al que pertenece el enlace.
+ * El widget vuelve a validar la URL contra la lista permitida antes de abrirla.
+ */
+export interface OpenUrlEvent {
+  type: 'open_url';
+  id: string;
+  url: string;
+  label: string;
+  /** `true` si el servidor ya abrió la pestaña (p. ej. en la máquina local); el widget no la reabre. */
+  openedByServer?: boolean;
+}
+
 /** Error reportado por el servidor. */
 export interface ErrorEvent {
   type: 'error';
@@ -46,7 +60,8 @@ export interface ErrorEvent {
   id?: string;
 }
 
-export type ServerEvent = MessageStartEvent | MessageDeltaEvent | MessageEndEvent | ErrorEvent;
+export type ServerEvent =
+  MessageStartEvent | MessageDeltaEvent | MessageEndEvent | OpenUrlEvent | ErrorEvent;
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -77,6 +92,15 @@ export function parseServerEvent(value: unknown): ServerEvent | null {
     case 'message_end':
       if (!isString(value.id)) return null;
       return { type: 'message_end', id: value.id };
+    case 'open_url':
+      if (!isString(value.id) || !isString(value.url) || !isString(value.label)) return null;
+      return {
+        type: 'open_url',
+        id: value.id,
+        url: value.url,
+        label: value.label,
+        ...(value.openedByServer === true ? { openedByServer: true } : {}),
+      };
     case 'error':
       if (!isString(value.message)) return null;
       return {

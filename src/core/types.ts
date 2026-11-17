@@ -14,6 +14,20 @@ export type MessageRole = 'user' | 'assistant';
  */
 export type MessageStatus = 'sending' | 'streaming' | 'done' | 'error';
 
+/**
+ * Enlace de referencia que el agente abrió (o intentó abrir) en una pestaña nueva:
+ *  - `pending`: recibido, aún sin abrir.
+ *  - `opened`:  la pestaña se abrió.
+ *  - `blocked`: el navegador bloqueó la ventana emergente; el usuario puede abrirlo con un clic.
+ */
+export type LinkStatus = 'pending' | 'opened' | 'blocked';
+
+export interface MessageLink {
+  url: string;
+  label: string;
+  status: LinkStatus;
+}
+
 export interface ChatMessage {
   id: string;
   role: MessageRole;
@@ -21,6 +35,8 @@ export interface ChatMessage {
   content: string;
   createdAt: number;
   status: MessageStatus;
+  /** Sitios de referencia abiertos por el agente para este mensaje. */
+  links?: MessageLink[];
 }
 
 /** Estado de la conexión con el backend (mock o agente real). */

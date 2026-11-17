@@ -119,4 +119,56 @@ describe('chatReducer', () => {
     state = chatReducer(state, { type: 'reset' });
     expect(state).toEqual({ ...createInitialState(), connection: 'open' });
   });
+
+  describe('open_url', () => {
+    const IMDB = 'https://www.imdb.com/title/tt1160419/';
+
+    function withReply(): ChatState {
+      return server(withUserMessage(), { type: 'message_start', id: 'a1' });
+    }
+
+    it('agrega el enlace pendiente al mensaje de respuesta', () => {
+      const state = server(withReply(), { type: 'open_url', id: 'a1', url: IMDB, label: 'IMDb' });
+      expect(state.messages[1]?.links).toEqual([{ url: IMDB, label: 'IMDb', status: 'pending' }]);
+    });
+
+    it('marca como abierto si el servidor ya abrió la pestaña', () => {
+      const state = server(withReply(), {
+        type: 'open_url',
+        id: 'a1',
+        url: IMDB,
+        label: 'IMDb',
+        openedByServer: true,
+      });
+      expect(state.messages[1]?.links?.[0]?.status).toBe('opened');
+    });
+
+    it('ignora URLs fuera de la lista, mensajes inexistentes y duplicados', () => {
+      const base = withReply();
+      expect(
+        server(base, { type: 'open_url', id: 'a1', url: 'https://evil.test/', label: 'x' }),
+      ).toBe(base);
+      expect(server(base, { type: 'open_url', id: 'nope', url: IMDB, label: 'x' })).toBe(base);
+      const once = server(base, { type: 'open_url', id: 'a1', url: IMDB, label: 'IMDb' });
+      expect(server(once, { type: 'open_url', id: 'a1', url: IMDB, label: 'IMDb' })).toBe(once);
+    });
+
+    it('actualiza el estado del enlace tras intentar abrirlo', () => {
+      const state = server(withReply(), { type: 'open_url', id: 'a1', url: IMDB, label: 'IMDb' });
+      const blocked = chatReducer(state, {
+        type: 'link_status',
+        messageId: 'a1',
+        url: IMDB,
+        status: 'blocked',
+      });
+      expect(blocked.messages[1]?.links?.[0]?.status).toBe('blocked');
+      const other = chatReducer(state, {
+        type: 'link_status',
+        messageId: 'u1',
+        url: IMDB,
+        status: 'opened',
+      });
+      expect(other.messages[0]?.links).toBeUndefined();
+    });
+  });
 });
