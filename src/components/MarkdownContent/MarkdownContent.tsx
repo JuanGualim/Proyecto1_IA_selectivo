@@ -1,6 +1,7 @@
 import { memo, useState, type ComponentPropsWithoutRef } from 'react';
 import Markdown, { type Components } from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import { isAllowedImageUrl } from '../../core/media';
 
 function extractText(node: unknown): string {
   if (typeof node === 'string' || typeof node === 'number') return String(node);
@@ -35,9 +36,30 @@ function CodeBlock({ children, ...props }: ComponentPropsWithoutRef<'pre'>) {
   );
 }
 
+/**
+ * Imágenes del agente (p. ej. pósters). Solo se cargan desde dominios confiables; cualquier
+ * otra se reemplaza por su texto alternativo para evitar la exfiltración de datos por URL.
+ */
+function SafeImage({ src, alt }: ComponentPropsWithoutRef<'img'>) {
+  const url = typeof src === 'string' ? src : undefined;
+  if (!isAllowedImageUrl(url)) {
+    return alt ? <span className="agichat-markdown__image-blocked">[{alt}]</span> : null;
+  }
+  return (
+    <img
+      className="agichat-markdown__image"
+      src={url}
+      alt={alt ?? ''}
+      loading="lazy"
+      referrerPolicy="no-referrer"
+    />
+  );
+}
+
 const components: Components = {
   a: ({ node: _node, ...props }) => <a {...props} target="_blank" rel="noopener noreferrer" />,
   pre: ({ node: _node, ...props }) => <CodeBlock {...props} />,
+  img: ({ node: _node, ...props }) => <SafeImage {...props} />,
   table: ({ node: _node, ...props }) => (
     <div className="agichat-table-wrapper">
       <table {...props} />

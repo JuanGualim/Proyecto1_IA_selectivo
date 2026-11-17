@@ -895,3 +895,22 @@
 .agichat-links__item--blocked a {
   border-color: var(--agichat-warning);
 }
+
+/* --- Pósters de películas en las respuestas del agente --- */
+.agichat-markdown__image {
+  display: inline-block;
+  width: 120px;
+  max-width: 45%;
+  aspect-ratio: 2 / 3;
+  margin: 4px 8px 4px 0;
+  border-radius: 10px;
+  object-fit: cover;
+  vertical-align: top;
+  background: var(--agichat-surface-2);
+  box-shadow: 0 6px 16px -8px rgba(0, 0, 0, 0.45);
+}
+
+.agichat-markdown__image-blocked {
+  color: var(--agichat-text-muted);
+  font-style: italic;
+}
