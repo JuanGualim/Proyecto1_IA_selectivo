@@ -94,9 +94,23 @@ export async function runCase(evalCase: EvalCase, options: RunOptions): Promise<
   }
 }
 
-export async function runSuite(cases: EvalCase[], options: RunOptions): Promise<EvalRun[]> {
+export interface SuiteOptions extends RunOptions {
+  /** Pausa entre casos (ms), para respetar los límites por minuto de los planes gratuitos. */
+  delayMs?: number;
+  sleep?: (ms: number) => Promise<void>;
+  onCase?: (evalCase: EvalCase, index: number) => void;
+}
+
+const defaultSleep = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
+
+export async function runSuite(cases: EvalCase[], options: SuiteOptions): Promise<EvalRun[]> {
+  const { delayMs = 0, sleep = defaultSleep, onCase } = options;
   const runs: EvalRun[] = [];
   // En serie: respeta los límites de la API en modo en vivo y da resultados reproducibles.
-  for (const evalCase of cases) runs.push(await runCase(evalCase, options));
+  for (const [index, evalCase] of cases.entries()) {
+    if (index > 0 && delayMs > 0) await sleep(delayMs);
+    onCase?.(evalCase, index);
+    runs.push(await runCase(evalCase, options));
+  }
   return runs;
 }

@@ -29,18 +29,21 @@ de películas multiagente** para Maxine (Proyecto #2).
 1. Crea las llaves (no se necesita tarjeta de crédito):
    - **TMDB:** <https://www.themoviedb.org/settings/api>. Indica que son estudiantes del curso
      CC3116 de la Universidad del Valle de Guatemala y selecciona **uso no comercial**.
-   - **Claude (Anthropic):** <https://console.anthropic.com/> para `ANTHROPIC_API_KEY`.
+   - **Groq (modelo de lenguaje, gratis):** <https://console.groq.com/keys> para `GROQ_API_KEY`.
+     Es el proveedor por defecto; también puedes usar NVIDIA NIM, Gemini u otra API compatible
+     con OpenAI (`LLM_PROVIDER=openai-compatible`) o Claude (`LLM_PROVIDER=anthropic`, de pago).
    - **Google Books** (opcional): una API key en Google Cloud Console.
 2. Configura y arranca:
 
 ```bash
-cp .env.example .env    # completa TMDB_API_KEY y ANTHROPIC_API_KEY
+cp .env.example .env    # completa TMDB_API_KEY y GROQ_API_KEY
 npm run agent-server    # agente en ws://127.0.0.1:8788 (lanza los servidores MCP)
 npm run dev             # demo en http://localhost:5173/?transport=agent
 ```
 
-Sin `ANTHROPIC_API_KEY` puedes usar `LLM_PROVIDER=scripted` para probar la conexión y las
-guardias. Si el navegador bloquea la pestaña que abre el agente, permite las ventanas emergentes
+Sin llave de LLM puedes usar `LLM_PROVIDER=scripted` para probar la conexión y las guardias.
+El plan gratuito de Groq tiene límites por minuto: si se alcanzan, el agente espera y reintenta
+solo (la respuesta tarda un poco más). Si el navegador bloquea la pestaña que abre el agente, permite las ventanas emergentes
 para el sitio (el widget deja el enlace para abrirla con un clic) o usa
 `NAVIGATOR_OPEN_ON_HOST=true` para que se abra en la máquina donde corre el agente.
 
@@ -48,7 +51,7 @@ para el sitio (el widget deja el enlace para abrirla con un clic) o usa
 
 ```bash
 npm run evals           # 25 casos sin red (funcionales, LLM01, LLM07) + ablación; corre en el CI
-npm run evals:live      # los mismos casos con el modelo real de Claude
+npm run evals:live      # los mismos casos con el modelo real (Groq por defecto)
 ```
 
 Con defensas: **25/25 casos aprobados y 0/19 ataques exitosos**; sin defensas el mismo modelo es
@@ -109,7 +112,7 @@ muestra el estado y se reconecta solo al volver a encenderlo.
 | `npm run agent-server`  | Agente real multiagente (puerto `8788`, configuración en `.env`)      |
 | `npm run mcp:tmdb`      | Servidor MCP de TMDB por stdio (también `mcp:books`, `mcp:navigator`) |
 | `npm run evals`         | Evals sin red (funcionales, LLM01, LLM07) con reporte y ablación      |
-| `npm run evals:live`    | Evals con el modelo real (requiere `ANTHROPIC_API_KEY`)               |
+| `npm run evals:live`    | Evals con el modelo real (Groq por defecto, requiere `GROQ_API_KEY`)  |
 | `npm run lint`          | ESLint (sin advertencias permitidas)                                  |
 | `npm run format`        | Formatea con Prettier (`format:check` solo verifica)                  |
 | `npm run typecheck`     | Verificación de tipos con TypeScript                                  |
@@ -224,5 +227,6 @@ inspiradas en el wireframe, según la libertad de estilos otorgada.
 
 React 19 · TypeScript · Vite · Vitest + Testing Library · ESLint + Prettier ·
 react-markdown + remark-gfm · ws (servidor mock y del agente) · GitHub Actions ·
-Model Context Protocol (SDK oficial) · Claude (SDK oficial de Anthropic) · zod ·
+Model Context Protocol (SDK oficial) · Groq (API compatible con OpenAI) · Claude (SDK oficial
+de Anthropic, opcional) · zod ·
 TMDB API · Google Books API

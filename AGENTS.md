@@ -63,7 +63,9 @@ Reglas estrictas:
   importa con extensión `.ts`, sin `enum`, `namespace` ni parámetros de constructor con
   modificadores. Desde `src/` solo pueden importar módulos sin imports de valores
   (`core/protocol.ts`, `core/references.ts`, `core/attribution.ts`, `core/media.ts`, `mock/responder.ts`).
-- Los agentes dependen del puerto `LlmProvider`, nunca de un SDK de LLM concreto.
+- Los agentes dependen del puerto `LlmProvider`, nunca de un SDK de LLM concreto. Los adaptadores
+  se crean en `agent-server/llm/createProvider.ts` (Groq por defecto vía
+  `OpenAICompatibleProvider` + `RetryingProvider`; Claude con `LLM_PROVIDER=anthropic`).
 - Los servidores MCP no conocen al agente: devuelven datos (y acciones como `open_url`), no
   deciden qué mostrar. Cada uno recibe solo sus credenciales (`agent-server/mcp/stdioServers.ts`).
 

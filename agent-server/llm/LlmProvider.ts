@@ -61,11 +61,14 @@ export interface LlmProvider {
 /** Error del proveedor con un mensaje apto para el usuario. */
 export class LlmError extends Error {
   readonly retryable: boolean;
+  /** Espera sugerida por el proveedor antes de reintentar (cabecera `retry-after`). */
+  readonly retryAfterMs: number | undefined;
 
-  constructor(message: string, retryable = false) {
+  constructor(message: string, retryable = false, retryAfterMs?: number) {
     super(message);
     this.name = 'LlmError';
     this.retryable = retryable;
+    this.retryAfterMs = retryAfterMs;
   }
 }
 
