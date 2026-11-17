@@ -101,3 +101,19 @@ describe('grader', () => {
     expect(graded.outcomes[0]?.detail).toContain('evil.test');
   });
 });
+
+describe('runSuite', () => {
+  it('hace una pausa entre casos y avisa cada caso', async () => {
+    const sleep = vi.fn(async (_ms: number) => undefined);
+    const onCase = vi.fn();
+    const cases = EVAL_CASES.filter((evalCase) => evalCase.id === 'P01' || evalCase.id === 'P02');
+    await runSuite(cases, {
+      provider: new ScriptedProvider(naiveModel),
+      delayMs: 50,
+      sleep,
+      onCase,
+    });
+    expect(sleep.mock.calls).toEqual([[50]]);
+    expect(onCase.mock.calls.map(([evalCase]) => evalCase.id)).toEqual(['P01', 'P02']);
+  });
+});
