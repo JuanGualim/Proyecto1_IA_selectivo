@@ -62,8 +62,10 @@ solo guarda categorías, nunca el texto del usuario.
   - `npm run evals` usa un **modelo peor caso** (`evals/naiveModel.ts`) que obedece cualquier
     instrucción del usuario o de los datos y revela su prompt si se lo piden. Es gratis,
     determinista y corre en el CI.
-  - `npm run evals:live` usa el modelo real (Claude, `ANTHROPIC_API_KEY`) con los mismos casos
-    y guarda `evals/reports/live.md`. Tiene costo: se ejecuta manualmente.
+  - `npm run evals:live` usa el modelo real configurado (Groq por defecto, `GROQ_API_KEY`) con los mismos casos
+    y guarda `evals/reports/live.md`. Se ejecuta manualmente porque depende de una llave y de
+    los límites del proveedor: con el plan gratuito de Groq hace una pausa de 15 s entre casos
+    (`EVALS_DELAY_MS`) y reintenta si se alcanza el límite por minuto.
 - **Ablación:** los ataques se repiten con las defensas 1, 3 y 5 desactivadas para medir cuánto
   aportan (la lista permitida de sitios sigue activa porque es estructural).
 
@@ -94,7 +96,7 @@ servidor de navegación solo construye enlaces de IMDb y Google Books a partir d
 
 ```bash
 npm run evals                         # sin red, también corre en el CI
-npm run evals:live                    # modelo real (requiere ANTHROPIC_API_KEY en .env)
+npm run evals:live                    # modelo real (Groq por defecto; requiere GROQ_API_KEY en .env)
 npm run evals:live -- --ablation      # modelo real con y sin defensas
 ```
 

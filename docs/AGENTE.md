@@ -48,7 +48,7 @@ flowchart LR
     end
 
     subgraph External["Servicios externos"]
-        CLAUDE["API de Claude<br/>(Anthropic)"]
+        LLMAPI["Modelo de lenguaje<br/>Groq (por defecto, gratis)<br/>o NVIDIA · Gemini · Claude"]
         TMDB["TMDB API v3<br/>+ image.tmdb.org"]
         GBOOKS["Google Books API v1"]
     end
@@ -57,7 +57,7 @@ flowchart LR
 
     WIDGET <-- "JSON por WebSocket<br/>user_message · message_* · open_url" --> LB --> WS
     WS --> ORCH
-    ORCH --> LLMPORT -->|"adaptador AnthropicProvider"| CLAUDE
+    ORCH --> LLMPORT -->|"OpenAICompatibleProvider + reintentos<br/>(o AnthropicProvider)"| LLMAPI
     ORCH --> MCPC
     MCPC <-- "MCP (stdio)" --> MTMDB & MBOOKS & MNAV
     MTMDB --> TMDB
@@ -69,14 +69,14 @@ flowchart LR
 
 ### Componentes
 
-| Componente                  | Carpeta             | Responsabilidad                                                                                        |
-| --------------------------- | ------------------- | ------------------------------------------------------------------------------------------------------ |
-| Widget (SDK)                | `src/`              | UI del chat; abre las pestañas pedidas (`open_url`), muestra pósters seguros y la atribución de TMDB.  |
-| Servidor del agente         | `agent-server/`     | WebSocket, orquestación multiagente, guardias de seguridad, configuración.                             |
-| Puerto + adaptadores de LLM | `agent-server/llm/` | `LlmProvider` (puerto), `AnthropicProvider` (Claude, SDK oficial), `ScriptedProvider` (tests y evals). |
-| Cliente MCP                 | `agent-server/mcp/` | `McpToolbox` descubre las herramientas de los servidores MCP y enruta las llamadas.                    |
-| Servidores MCP              | `mcp-servers/`      | Herramientas reutilizables: TMDB, Google Books y navegación.                                           |
-| Evals                       | `evals/`            | Casos funcionales y de ataques, evaluador, reporte y ablación.                                         |
+| Componente                  | Carpeta             | Responsabilidad                                                                                                                                                                                                     |
+| --------------------------- | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Widget (SDK)                | `src/`              | UI del chat; abre las pestañas pedidas (`open_url`), muestra pósters seguros y la atribución de TMDB.                                                                                                               |
+| Servidor del agente         | `agent-server/`     | WebSocket, orquestación multiagente, guardias de seguridad, configuración.                                                                                                                                          |
+| Puerto + adaptadores de LLM | `agent-server/llm/` | `LlmProvider` (puerto), `OpenAICompatibleProvider` (Groq por defecto; NVIDIA, Gemini, …), `RetryingProvider` (reintentos ante límites), `AnthropicProvider` (Claude, opcional), `ScriptedProvider` (tests y evals). |
+| Cliente MCP                 | `agent-server/mcp/` | `McpToolbox` descubre las herramientas de los servidores MCP y enruta las llamadas.                                                                                                                                 |
+| Servidores MCP              | `mcp-servers/`      | Herramientas reutilizables: TMDB, Google Books y navegación.                                                                                                                                                        |
+| Evals                       | `evals/`            | Casos funcionales y de ataques, evaluador, reporte y ablación.                                                                                                                                                      |
 
 ## 3. ¿Por qué escala?
 
@@ -131,7 +131,7 @@ y registrarse en cualquier cliente MCP. Ejemplo para Claude Desktop:
 ## 5. Ejecutar el agente
 
 ```bash
-cp .env.example .env      # completa TMDB_API_KEY y ANTHROPIC_API_KEY
+cp .env.example .env      # completa TMDB_API_KEY y GROQ_API_KEY
 npm run agent-server      # ws://127.0.0.1:8788 (lanza los 3 servidores MCP)
 npm run dev               # demo: Configurar demo → Backend → Agente real
 ```
@@ -229,7 +229,7 @@ sequenceDiagram
     participant SUP as Supervisor
     participant B as Agente de libros
     participant M as MCP tmdb / books
-    participant L as Claude (LLM)
+    participant L as LLM (Groq)
 
     U->>W: ¿Dune vale la pena o mejor leo el libro?
     W->>S: user_message

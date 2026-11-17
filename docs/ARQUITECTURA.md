@@ -178,7 +178,7 @@ Los eventos recibidos se validan con `parseServerEvent`; los inválidos se ignor
 ├── demo/                        # App de ejemplo que simula el sitio de un cliente (no es parte del SDK)
 ├── agent-server/                # AGENTE REAL (Proyecto #2, Node): sistema multiagente
 │   ├── agents/                  #   Orquestador, supervisor, especialistas, prompts, bucle agéntico
-│   ├── llm/                     #   Puerto LlmProvider + adaptadores (Claude, determinista)
+│   ├── llm/                     #   Puerto LlmProvider + adaptadores (Groq/OpenAI-compatible, Claude, determinista)
 │   ├── mcp/                     #   Cliente MCP (McpToolbox) y lanzador de servidores por stdio
 │   ├── security/                #   Guardias de entrada, de datos externos y de salida (LLM01/LLM07)
 │   ├── testing/                 #   Dobles de prueba compartidos con las evals
