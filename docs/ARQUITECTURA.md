@@ -4,6 +4,9 @@ Este documento describe la arquitectura del widget de chat agéntico de AGIChat,
 de las decisiones tomadas y cómo debe crecer la estructura de carpetas a medida que el proyecto
 escale (fase 2: conexión con un agente real).
 
+> **Proyecto #2:** el agente real (sistema multiagente con servidores MCP) está documentado en
+> [`AGENTE.md`](AGENTE.md) y su seguridad y evals en [`SEGURIDAD_Y_EVALS.md`](SEGURIDAD_Y_EVALS.md).
+
 ## 1. Visión general
 
 El producto es un **Software Development Kit (SDK)**: un widget de chat que los clientes de
@@ -54,7 +57,7 @@ flowchart TB
 
     subgraph Backend["Backend"]
         MOCKSRV["Servidor WebSocket mock<br/>mock-server/ (Fase 1)"]
-        AGENT["Agente de IA real<br/>(Fase 2)"]
+        AGENT["Agente de IA real<br/>agent-server/ + mcp-servers/ (Fase 2)"]
     end
 
     HOST --> API
@@ -149,13 +152,14 @@ Se eligió una **arquitectura hexagonal** combinada con un **flujo de datos unid
 Definido en [`src/core/protocol.ts`](../src/core/protocol.ts). Todo backend (mock o real) debe
 hablar este protocolo en JSON:
 
-| Dirección        | Evento          | Campos                                |
-| ---------------- | --------------- | ------------------------------------- |
-| Widget → Backend | `user_message`  | `id`, `content`                       |
-| Backend → Widget | `message_start` | `id` (de la respuesta), `replyTo?`    |
-| Backend → Widget | `message_delta` | `id`, `delta` (fragmento de Markdown) |
-| Backend → Widget | `message_end`   | `id`                                  |
-| Backend → Widget | `error`         | `message`, `id?` (mensaje afectado)   |
+| Dirección        | Evento          | Campos                                                                                                     |
+| ---------------- | --------------- | ---------------------------------------------------------------------------------------------------------- |
+| Widget → Backend | `user_message`  | `id`, `content`                                                                                            |
+| Backend → Widget | `message_start` | `id` (de la respuesta), `replyTo?`                                                                         |
+| Backend → Widget | `message_delta` | `id`, `delta` (fragmento de Markdown)                                                                      |
+| Backend → Widget | `message_end`   | `id`                                                                                                       |
+| Backend → Widget | `open_url`      | `id`, `url`, `label`, `openedByServer?` (abre IMDb / Google Books en una pestaña; el widget valida la URL) |
+| Backend → Widget | `error`         | `message`, `id?` (mensaje afectado)                                                                        |
 
 Los eventos recibidos se validan con `parseServerEvent`; los inválidos se ignoran.
 
@@ -172,8 +176,25 @@ Los eventos recibidos se validan con `parseServerEvent`; los inválidos se ignor
 │   ├── CODEOWNERS               # Revisores obligatorios
 │   └── dependabot.yml
 ├── demo/                        # App de ejemplo que simula el sitio de un cliente (no es parte del SDK)
+├── agent-server/                # AGENTE REAL (Proyecto #2, Node): sistema multiagente
+│   ├── agents/                  #   Orquestador, supervisor, especialistas, prompts, bucle agéntico
+│   ├── llm/                     #   Puerto LlmProvider + adaptadores (Claude, determinista)
+│   ├── mcp/                     #   Cliente MCP (McpToolbox) y lanzador de servidores por stdio
+│   ├── security/                #   Guardias de entrada, de datos externos y de salida (LLM01/LLM07)
+│   ├── testing/                 #   Dobles de prueba compartidos con las evals
+│   ├── config.ts                #   Configuración desde variables de entorno
+│   ├── createAgentServer.ts     #   Servidor WebSocket con el protocolo del widget
+│   └── main.ts                  #   Punto de entrada: npm run agent-server
+├── mcp-servers/                 # SERVIDORES MCP reutilizables por cualquier agente
+│   ├── tmdb/                    #   Películas (The Movie Database)
+│   ├── books/                   #   Libros (Google Books)
+│   ├── navigator/               #   Abrir IMDb / Google Books en una pestaña
+│   └── shared/                  #   HTTP con tiempo límite y formato de resultados
+├── evals/                       # Evals funcionales y de ataques (LLM01, LLM07) + reportes
 ├── docs/
-│   └── ARQUITECTURA.md          # Este documento
+│   ├── ARQUITECTURA.md          # Este documento
+│   ├── AGENTE.md                # Arquitectura del agente (alto y bajo nivel)
+│   └── SEGURIDAD_Y_EVALS.md     # Defensas LLM01/LLM07 y resultados de las evals
 ├── mock-server/                 # Servidor WebSocket que simula al agente (Node)
 │   ├── createMockServer.ts
 │   ├── createMockServer.test.ts
@@ -183,6 +204,9 @@ Los eventos recibidos se validan con `parseServerEvent`; los inválidos se ignor
 │   │   ├── types.ts             #   Tipos de dominio (ChatMessage, ConnectionStatus)
 │   │   ├── protocol.ts          #   Contrato de eventos con el backend + validación
 │   │   ├── chatReducer.ts       #   Estado y reglas del chat
+│   │   ├── references.ts        #   Lista permitida de sitios de referencia (IMDb, Google Books)
+│   │   ├── media.ts             #   Dominios permitidos para imágenes (pósters)
+│   │   ├── attribution.ts       #   Atribución del proveedor de datos (TMDB)
 │   │   ├── format.ts            #   Utilidades de presentación puras
 │   │   └── id.ts
 │   ├── transports/              # PUERTO + ADAPTADORES
@@ -201,7 +225,9 @@ Los eventos recibidos se validan con `parseServerEvent`; los inválidos se ignor
 │   │   ├── Avatar/              #   Avatar circular (barra superior y bienvenida)
 │   │   ├── MessageList/
 │   │   ├── MessageBubble/
-│   │   ├── MarkdownContent/
+│   │   ├── MarkdownContent/     #   Markdown seguro (imágenes solo de dominios confiables)
+│   │   ├── ReferenceLinks/      #   Sitios abiertos por el agente (o bloqueados por el navegador)
+│   │   ├── Attribution/         #   Logo y aviso de TMDB
 │   │   ├── ChatInput/
 │   │   ├── TypingIndicator/
 │   │   └── icons/
