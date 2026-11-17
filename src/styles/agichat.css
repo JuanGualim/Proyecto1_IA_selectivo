@@ -863,3 +863,35 @@
     transition: none !important;
   }
 }
+
+/* --- Sitios de referencia abiertos por el agente (IMDb, Google Books) --- */
+.agichat-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.agichat-links__item a {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  border: 1px solid var(--agichat-border);
+  border-radius: 999px;
+  background: var(--agichat-primary-soft);
+  color: var(--agichat-text);
+  font-size: 12px;
+  text-decoration: none;
+}
+
+.agichat-links__item a:hover,
+.agichat-links__item a:focus-visible {
+  border-color: var(--agichat-primary);
+}
+
+.agichat-links__item--blocked a {
+  border-color: var(--agichat-warning);
+}

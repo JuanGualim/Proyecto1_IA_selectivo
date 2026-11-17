@@ -1,6 +1,7 @@
 import { formatTime } from '../../core/format';
 import type { ChatMessage } from '../../core/types';
 import { MarkdownContent } from '../MarkdownContent/MarkdownContent';
+import { ReferenceLinks } from '../ReferenceLinks/ReferenceLinks';
 import { RetryIcon } from '../icons/icons';
 
 export interface MessageBubbleProps {
@@ -33,6 +34,7 @@ export function MessageBubble({ message, onRetry }: MessageBubbleProps) {
           <MarkdownContent content={message.content} />
         )}
         {isStreaming && <span className="agichat-cursor" aria-hidden="true" />}
+        {!isUser && <ReferenceLinks links={message.links} />}
       </div>
       {isError && (
         <div className="agichat-message__meta">
