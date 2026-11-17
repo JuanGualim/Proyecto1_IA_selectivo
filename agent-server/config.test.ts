@@ -12,7 +12,7 @@ describe('loadConfig', () => {
       assistantName: 'Sofía',
       llm: {
         provider: 'groq',
-        model: 'llama-3.3-70b-versatile',
+        model: 'openai/gpt-oss-120b',
         effort: 'low',
         apiKey: 'gsk_x',
         baseUrl: 'https://api.groq.com/openai/v1',
