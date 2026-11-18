@@ -50,6 +50,16 @@ describe('createMockServer', () => {
     expect(events.at(-1)?.type).toBe('message_end');
   });
 
+  it('emite open_url cuando el agente simulado abre IMDb', async () => {
+    const received = collectUntil(socket, (e) => e.type === 'message_end');
+    socket.send(JSON.stringify({ type: 'user_message', id: 'u1', content: 'abre IMDb' }));
+    const events = await received;
+    expect(events[1]).toMatchObject({
+      type: 'open_url',
+      url: 'https://www.imdb.com/title/tt1160419/',
+    });
+  });
+
   it('reporta errores del agente con el id del mensaje', async () => {
     const received = collectUntil(socket, (e) => e.type === 'error');
     socket.send(JSON.stringify({ type: 'user_message', id: 'u9', content: 'error' }));

@@ -31,7 +31,13 @@ export default tseslint.config(
     },
   },
   {
-    files: ['mock-server/**/*.ts', '*.config.{js,ts}'],
+    files: [
+      'mock-server/**/*.ts',
+      'mcp-servers/**/*.ts',
+      'agent-server/**/*.ts',
+      'evals/**/*.ts',
+      '*.config.{js,ts}',
+    ],
     languageOptions: { globals: { ...globals.node } },
     rules: { 'no-console': 'off' },
   },

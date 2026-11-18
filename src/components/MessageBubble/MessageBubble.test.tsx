@@ -45,4 +45,18 @@ describe('MessageBubble', () => {
     render(<MessageBubble message={message({ status: 'error' })} onRetry={vi.fn()} />);
     expect(screen.queryByRole('button', { name: /Reintentar/ })).toBeNull();
   });
+
+  it('muestra los sitios de referencia que abrió el agente', () => {
+    render(
+      <MessageBubble
+        message={message({
+          links: [{ url: 'https://www.imdb.com/title/tt1/', label: 'IMDb', status: 'opened' }],
+        })}
+      />,
+    );
+    expect(screen.getByRole('link', { name: /IMDb/ })).toHaveAttribute(
+      'href',
+      'https://www.imdb.com/title/tt1/',
+    );
+  });
 });

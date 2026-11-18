@@ -2,19 +2,27 @@ import { useMemo, useState } from 'react';
 import {
   ChatWidget,
   MockTransport,
+  TMDB_ATTRIBUTION,
   WebSocketTransport,
   type ChatTransport,
   type ChatWidgetPosition,
   type ChatWidgetTheme,
 } from '../src';
 
-type TransportKind = 'mock' | 'websocket';
+type TransportKind = 'mock' | 'websocket' | 'agent';
 type Layout = 'panel' | 'floating';
 
 const DEFAULT_WS_URL = 'ws://127.0.0.1:8787';
+/** Servidor del agente real (`npm run agent-server`). */
+const DEFAULT_AGENT_URL = 'ws://127.0.0.1:8788';
+const TRANSPORT_KINDS: TransportKind[] = ['mock', 'websocket', 'agent'];
 /** `undefined` = color por defecto del widget (respeta el tema oscuro). */
 const COLORS: Array<string | undefined> = [undefined, '#0ea5e9', '#10b981', '#f43f5e', '#15161c'];
-const SUGGESTIONS = ['¿Cuál es la respuesta del universo?', 'Muéstrame una tabla', 'Dame código'];
+const SUGGESTIONS = [
+  'Recomiéndame una película de ciencia ficción',
+  '¿Dune vale la pena o mejor leo el libro?',
+  'Abre IMDb de Interstellar',
+];
 
 function readParam(name: string): string | null {
   return new URLSearchParams(window.location.search).get(name);
@@ -28,11 +36,18 @@ export function DemoApp() {
   const [layout, setLayout] = useState<Layout>(
     readParam('layout') === 'floating' ? 'floating' : 'panel',
   );
-  const [kind, setKind] = useState<TransportKind>(
-    readParam('transport') === 'websocket' ? 'websocket' : 'mock',
-  );
-  const [wsUrl, setWsUrl] = useState(DEFAULT_WS_URL);
-  const [wsUrlDraft, setWsUrlDraft] = useState(DEFAULT_WS_URL);
+  const initialKind = TRANSPORT_KINDS.find((item) => item === readParam('transport')) ?? 'mock';
+  const [kind, setKind] = useState<TransportKind>(initialKind);
+  const initialUrl = initialKind === 'agent' ? DEFAULT_AGENT_URL : DEFAULT_WS_URL;
+  const [wsUrl, setWsUrl] = useState(initialUrl);
+  const [wsUrlDraft, setWsUrlDraft] = useState(initialUrl);
+
+  const changeKind = (next: TransportKind) => {
+    const url = next === 'agent' ? DEFAULT_AGENT_URL : DEFAULT_WS_URL;
+    setKind(next);
+    setWsUrl(url);
+    setWsUrlDraft(url);
+  };
   const [theme, setTheme] = useState<ChatWidgetTheme>('light');
   const [position, setPosition] = useState<ChatWidgetPosition>('bottom-right');
   const [color, setColor] = useState<string | undefined>(undefined);
@@ -48,6 +63,8 @@ export function DemoApp() {
       key={`${kind}-${wsUrl}-${layout}`}
       transport={transport}
       assistantName="Sofía"
+      description="Te recomiendo películas, las comparo con su libro y abro IMDb o Google Books por ti"
+      attribution={TMDB_ATTRIBUTION}
       mode={layout === 'panel' ? 'inline' : 'floating'}
       theme={theme}
       position={position}
@@ -72,13 +89,14 @@ export function DemoApp() {
 
         <label>
           Backend
-          <select value={kind} onChange={(e) => setKind(e.target.value as TransportKind)}>
+          <select value={kind} onChange={(e) => changeKind(e.target.value as TransportKind)}>
             <option value="mock">Mock en el navegador</option>
-            <option value="websocket">WebSocket (npm run mock-server)</option>
+            <option value="websocket">WebSocket mock (npm run mock-server)</option>
+            <option value="agent">Agente real (npm run agent-server)</option>
           </select>
         </label>
 
-        {kind === 'websocket' && (
+        {kind !== 'mock' && (
           <label>
             URL del WebSocket
             <input
@@ -130,8 +148,9 @@ export function DemoApp() {
         </fieldset>
 
         <p className="demo__hint">
-          Prueba escribir <code>ayuda</code>, <code>tabla</code>, <code>código</code>,{' '}
-          <code>markdown</code> o <code>error</code>.
+          Prueba escribir <code>recomiéndame una película</code>,{' '}
+          <code>compárala con el libro</code>, <code>abre IMDb</code> o <code>ayuda</code>. Si el
+          navegador bloquea la pestaña, permite las ventanas emergentes para este sitio.
         </p>
       </details>
 

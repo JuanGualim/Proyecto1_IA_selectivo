@@ -1,5 +1,7 @@
+import type { AttributionInfo } from '../../core/attribution';
 import { STATUS_LABELS } from '../../core/format';
 import type { UseChatResult } from '../../hooks/useChat';
+import { Attribution } from '../Attribution/Attribution';
 import { Avatar } from '../Avatar/Avatar';
 import { ChatInput } from '../ChatInput/ChatInput';
 import { MessageList } from '../MessageList/MessageList';
@@ -14,6 +16,8 @@ export interface ChatWindowProps {
   avatarUrl?: string;
   placeholder?: string;
   suggestions?: string[];
+  /** Pie con la atribución del proveedor de datos (p. ej. `TMDB_ATTRIBUTION`). */
+  attribution?: AttributionInfo;
   onClose?: () => void;
 }
 
@@ -29,6 +33,7 @@ export function ChatWindow({
   avatarUrl,
   placeholder,
   suggestions,
+  attribution,
   onClose,
 }: ChatWindowProps) {
   const { messages, isResponding, connection, error } = chat;
@@ -103,6 +108,7 @@ export function ChatWindow({
       )}
 
       <ChatInput onSend={chat.sendMessage} disabled={isResponding} placeholder={placeholder} />
+      {attribution && <Attribution attribution={attribution} />}
     </section>
   );
 }

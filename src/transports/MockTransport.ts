@@ -58,6 +58,9 @@ export class MockTransport extends BaseTransport {
         return;
       }
       this.emit({ type: 'message_start', id: responseId, replyTo: event.id });
+      for (const link of reply.links ?? []) {
+        this.emit({ type: 'open_url', id: responseId, url: link.url, label: link.label });
+      }
       this.streamChunks(responseId, chunkText(reply.content));
     });
   }

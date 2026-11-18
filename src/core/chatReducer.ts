@@ -1,5 +1,6 @@
 import type { ServerEvent } from './protocol';
-import type { ChatMessage, ConnectionStatus } from './types';
+import { isAllowedReferenceUrl } from './references';
+import type { ChatMessage, ConnectionStatus, LinkStatus } from './types';
 
 /**
  * Estado del chat y reducer puro que lo actualiza.
@@ -20,6 +21,7 @@ export type ChatAction =
   | { type: 'connection_changed'; status: ConnectionStatus }
   | { type: 'send_failed'; id: string; error: string }
   | { type: 'remove_message'; id: string }
+  | { type: 'link_status'; messageId: string; url: string; status: LinkStatus }
   | { type: 'dismiss_error' }
   | { type: 'reset' };
 
@@ -101,6 +103,24 @@ function reduceServerEvent(state: ChatState, event: ServerEvent, receivedAt: num
           status: 'done',
         })),
       };
+    case 'open_url': {
+      // Defensa en profundidad: solo se aceptan sitios de la lista permitida.
+      if (!isAllowedReferenceUrl(event.url)) return state;
+      const target = state.messages.find((message) => message.id === event.id);
+      if (!target || target.links?.some((link) => link.url === event.url)) return state;
+      const link = {
+        url: event.url,
+        label: event.label.slice(0, 80),
+        status: event.openedByServer ? ('opened' as const) : ('pending' as const),
+      };
+      return {
+        ...state,
+        messages: updateMessage(state.messages, event.id, (message) => ({
+          ...message,
+          links: [...(message.links ?? []), link],
+        })),
+      };
+    }
     case 'error': {
       const targetExists =
         event.id !== undefined && state.messages.some((message) => message.id === event.id);
@@ -151,6 +171,16 @@ export function chatReducer(state: ChatState, action: ChatAction): ChatState {
         messages: updateMessage(state.messages, action.id, (message) => ({
           ...message,
           status: 'error',
+        })),
+      };
+    case 'link_status':
+      return {
+        ...state,
+        messages: updateMessage(state.messages, action.messageId, (message) => ({
+          ...message,
+          links: message.links?.map((link) =>
+            link.url === action.url ? { ...link, status: action.status } : link,
+          ),
         })),
       };
     case 'remove_message':

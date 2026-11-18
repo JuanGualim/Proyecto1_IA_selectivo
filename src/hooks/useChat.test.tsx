@@ -1,6 +1,6 @@
 import { act, renderHook } from '@testing-library/react';
 import { FakeTransport } from '../test/FakeTransport';
-import { useChat } from './useChat';
+import { openInNewTab, useChat } from './useChat';
 
 function setup() {
   const transport = new FakeTransport();
@@ -113,5 +113,65 @@ describe('useChat', () => {
       ]),
     );
     expect(result.current.messages).toHaveLength(1);
+  });
+
+  describe('apertura de sitios de referencia', () => {
+    const IMDB = 'https://www.imdb.com/title/tt1160419/';
+
+    function setupWithOpener(openUrl: (url: string) => boolean) {
+      const transport = new FakeTransport();
+      const hook = renderHook(() => useChat(transport, [], { openUrl }));
+      act(() => hook.result.current.sendMessage('ábreme IMDb'));
+      act(() => transport.serverEmit({ type: 'message_start', id: 'a1' }));
+      return { transport, ...hook };
+    }
+
+    it('abre la pestaña sin clic y marca el enlace como abierto', () => {
+      const openUrl = vi.fn(() => true);
+      const { transport, result } = setupWithOpener(openUrl);
+
+      act(() => transport.serverEmit({ type: 'open_url', id: 'a1', url: IMDB, label: 'IMDb' }));
+      act(() => transport.serverEmit({ type: 'open_url', id: 'a1', url: IMDB, label: 'IMDb' }));
+
+      expect(openUrl).toHaveBeenCalledTimes(1);
+      expect(openUrl).toHaveBeenCalledWith(IMDB);
+      expect(result.current.messages[1]?.links).toEqual([
+        { url: IMDB, label: 'IMDb', status: 'opened' },
+      ]);
+    });
+
+    it('marca el enlace como bloqueado si el navegador impide la ventana', () => {
+      const { transport, result } = setupWithOpener(() => false);
+      act(() => transport.serverEmit({ type: 'open_url', id: 'a1', url: IMDB, label: 'IMDb' }));
+      expect(result.current.messages[1]?.links?.[0]?.status).toBe('blocked');
+    });
+
+    it('no abre URLs fuera de la lista ni las que ya abrió el servidor', () => {
+      const openUrl = vi.fn(() => true);
+      const { transport } = setupWithOpener(openUrl);
+      act(() =>
+        transport.serverEmit({ type: 'open_url', id: 'a1', url: 'https://evil.test', label: 'x' }),
+      );
+      act(() =>
+        transport.serverEmit({
+          type: 'open_url',
+          id: 'a1',
+          url: IMDB,
+          label: 'IMDb',
+          openedByServer: true,
+        }),
+      );
+      expect(openUrl).not.toHaveBeenCalled();
+    });
+
+    it('openInNewTab abre con window.open y corta window.opener', () => {
+      const tab = { opener: 'padre' } as unknown as Window;
+      const open = vi.spyOn(window, 'open').mockReturnValueOnce(tab).mockReturnValueOnce(null);
+      expect(openInNewTab(IMDB)).toBe(true);
+      expect(tab.opener).toBeNull();
+      expect(openInNewTab(IMDB)).toBe(false);
+      expect(open).toHaveBeenCalledWith(IMDB, '_blank');
+      open.mockRestore();
+    });
   });
 });

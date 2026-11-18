@@ -15,8 +15,16 @@ describe('defaultResponder', () => {
     ['una lista', '- [x]'],
     ['markdown', '# Encabezado'],
     ['Hola quiero saber la respuesta del universo!', '**42**'],
+    ['Recomiéndame una película', '![Póster de Dune](https://image.tmdb.org/'],
+    ['compárala con el libro', 'Veredicto'],
   ])('responde a "%s" con Markdown', (input, expected) => {
     expect(content(input)).toContain(expected);
+  });
+
+  it('abre IMDb con un enlace de referencia', () => {
+    expect(defaultResponder('abre IMDb')).toMatchObject({
+      links: [{ url: 'https://www.imdb.com/title/tt1160419/', label: 'IMDb: Dune' }],
+    });
   });
 
   it('simula un error', () => {

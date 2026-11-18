@@ -4,7 +4,63 @@
 [![CD](https://github.com/JuanGualim/Proyecto1_IA_selectivo/actions/workflows/cd.yml/badge.svg)](https://github.com/JuanGualim/Proyecto1_IA_selectivo/actions/workflows/cd.yml)
 
 SDK de un **widget de chat agéntico** que permite a los clientes de AGIChat añadir una interfaz
-de agente de IA a sus sitios en minutos. Proyecto #1 del curso CC3116.
+de agente de IA a sus sitios en minutos (Proyecto #1 del curso CC3116), conectado a un **agente
+de películas multiagente** para Maxine (Proyecto #2).
+
+## Proyecto #2: agente de películas
+
+- 🎬 **Recomienda películas** con [The Movie Database](https://www.themoviedb.org/) y muestra su
+  **póster**. El widget muestra el logo y el aviso de atribución de TMDB.
+- 📚 **Compara la película con su libro** ([Google Books](https://developers.google.com/books))
+  y da un veredicto de si vale la pena verla; **anuncia** que puede hacerlo cuando la película
+  está basada en un libro.
+- 🔗 **Abre IMDb o Google Books en una pestaña nueva sin que el usuario haga clic** (evento
+  `open_url` del protocolo).
+- 🤖 **Sistema multiagente jerárquico**: un supervisor delega en un agente de películas y uno de
+  libros. Las herramientas están en **3 servidores MCP** reutilizables por otros agentes.
+- 🛡️ Reforzado contra **OWASP LLM01 (prompt injection)** y **LLM07 (filtración del system
+  prompt)**, con **evals** que miden ataques con y sin defensas.
+
+📐 Arquitectura del agente (diagramas de alto y bajo nivel): [`docs/AGENTE.md`](docs/AGENTE.md)
+🛡️ Seguridad y evals: [`docs/SEGURIDAD_Y_EVALS.md`](docs/SEGURIDAD_Y_EVALS.md)
+
+### Ejecutar el agente
+
+1. Crea las llaves (no se necesita tarjeta de crédito):
+   - **TMDB:** <https://www.themoviedb.org/settings/api>. Indica que son estudiantes del curso
+     CC3116 de la Universidad del Valle de Guatemala y selecciona **uso no comercial**.
+   - **Groq (modelo de lenguaje, gratis):** <https://console.groq.com/keys> para `GROQ_API_KEY`.
+     Es el proveedor por defecto; también puedes usar NVIDIA NIM, Gemini u otra API compatible
+     con OpenAI (`LLM_PROVIDER=openai-compatible`) o Claude (`LLM_PROVIDER=anthropic`, de pago).
+   - **Google Books** (opcional): una API key en Google Cloud Console.
+2. Configura y arranca:
+
+```bash
+cp .env.example .env    # completa TMDB_API_KEY y GROQ_API_KEY
+npm run agent-server    # agente en ws://127.0.0.1:8788 (lanza los servidores MCP)
+npm run dev             # demo en http://localhost:5173/?transport=agent
+```
+
+Sin llave de LLM puedes usar `LLM_PROVIDER=scripted` para probar la conexión y las guardias.
+El plan gratuito de Groq (modelo `openai/gpt-oss-120b`) permite unas 1000 solicitudes al día y
+8000 tokens por minuto. Cada mensaje hace varias llamadas al modelo (supervisor + especialistas),
+así que una respuesta tarda de 10 a 20 s; si escribes varios mensajes seguidos y se agota el
+minuto, el agente espera y reintenta solo (puede tardar 1–2 min). Revisa tus límites y los modelos
+activos en <https://console.groq.com/settings/limits>. Si el navegador bloquea la pestaña que abre el agente, permite las ventanas emergentes
+para el sitio (el widget deja el enlace para abrirla con un clic) o usa
+`NAVIGATOR_OPEN_ON_HOST=true` para que se abra en la máquina donde corre el agente.
+
+### Evals
+
+```bash
+npm run evals           # 25 casos sin red (funcionales, LLM01, LLM07) + ablación; corre en el CI
+npm run evals:live      # los mismos casos con el modelo real (Groq por defecto)
+```
+
+Con defensas: **25/25 casos aprobados y 0/19 ataques exitosos**; sin defensas el mismo modelo es
+comprometido en 9/19 ataques. Ver [`evals/reports/offline.md`](evals/reports/offline.md).
+
+## Proyecto #1: widget SDK
 
 - 💬 Panel de chat fiel al [wireframe](#sobre-el-wireframe) (bienvenida con avatar, mensajes del
   usuario en píldora y respuestas del agente en texto plano), embebido o como burbuja flotante;
@@ -52,17 +108,21 @@ muestra el estado y se reconecta solo al volver a encenderlo.
 
 ## Scripts
 
-| Comando                 | Descripción                                                          |
-| ----------------------- | -------------------------------------------------------------------- |
-| `npm run dev`           | Servidor de desarrollo de la demo                                    |
-| `npm run mock-server`   | Servidor WebSocket que simula al agente (puerto `8787`, var. `PORT`) |
-| `npm run lint`          | ESLint (sin advertencias permitidas)                                 |
-| `npm run format`        | Formatea con Prettier (`format:check` solo verifica)                 |
-| `npm run typecheck`     | Verificación de tipos con TypeScript                                 |
-| `npm test`              | Ejecuta los tests                                                    |
-| `npm run test:coverage` | Tests + reporte de cobertura (falla si es < 80 %)                    |
-| `npm run build`         | Build del SDK (`dist/lib`, `dist/embed`) y de la demo (`dist/demo`)  |
-| `npm run ci`            | Todo lo anterior, igual que el pipeline de CI                        |
+| Comando                 | Descripción                                                           |
+| ----------------------- | --------------------------------------------------------------------- |
+| `npm run dev`           | Servidor de desarrollo de la demo                                     |
+| `npm run mock-server`   | Servidor WebSocket que simula al agente (puerto `8787`, var. `PORT`)  |
+| `npm run agent-server`  | Agente real multiagente (puerto `8788`, configuración en `.env`)      |
+| `npm run mcp:tmdb`      | Servidor MCP de TMDB por stdio (también `mcp:books`, `mcp:navigator`) |
+| `npm run evals`         | Evals sin red (funcionales, LLM01, LLM07) con reporte y ablación      |
+| `npm run evals:live`    | Evals con el modelo real (Groq por defecto, requiere `GROQ_API_KEY`)  |
+| `npm run lint`          | ESLint (sin advertencias permitidas)                                  |
+| `npm run format`        | Formatea con Prettier (`format:check` solo verifica)                  |
+| `npm run typecheck`     | Verificación de tipos con TypeScript                                  |
+| `npm test`              | Ejecuta los tests                                                     |
+| `npm run test:coverage` | Tests + reporte de cobertura (falla si es < 80 %)                     |
+| `npm run build`         | Build del SDK (`dist/lib`, `dist/embed`) y de la demo (`dist/demo`)   |
+| `npm run ci`            | Todo lo anterior, igual que el pipeline de CI                         |
 
 ## Uso del SDK
 
@@ -110,22 +170,24 @@ crea su propio contenedor en `<body>`.
 
 ### Propiedades de `ChatWidget`
 
-| Prop              | Tipo                              | Por defecto                                          |
-| ----------------- | --------------------------------- | ---------------------------------------------------- |
-| `transport`       | `ChatTransport` (obligatorio)     | —                                                    |
-| `assistantName`   | `string`                          | `'Sofía'`                                            |
-| `greeting`        | `string`                          | `'¡Hola soy tu asistente virtual <assistantName>!'`  |
-| `description`     | `string`                          | `'Escribe una duda y yo te ayudaré en lo que pueda'` |
-| `avatarUrl`       | `string` (URL de imagen)          | osito ilustrado                                      |
-| `placeholder`     | `string`                          | `'Escribe un mensaje…'`                              |
-| `suggestions`     | `string[]`                        | `[]`                                                 |
-| `position`        | `'bottom-right' \| 'bottom-left'` | `'bottom-right'`                                     |
-| `theme`           | `'light' \| 'dark' \| 'auto'`     | `'light'`                                            |
-| `primaryColor`    | color CSS                         | `#6d4aff`                                            |
-| `mode`            | `'floating' \| 'inline'`          | `'floating'`                                         |
-| `defaultOpen`     | `boolean`                         | `false`                                              |
-| `initialMessages` | `ChatMessage[]`                   | `[]`                                                 |
-| `onOpenChange`    | `(open: boolean) => void`         | —                                                    |
+| Prop              | Tipo                                          | Por defecto                                          |
+| ----------------- | --------------------------------------------- | ---------------------------------------------------- |
+| `transport`       | `ChatTransport` (obligatorio)                 | —                                                    |
+| `assistantName`   | `string`                                      | `'Sofía'`                                            |
+| `greeting`        | `string`                                      | `'¡Hola soy tu asistente virtual <assistantName>!'`  |
+| `description`     | `string`                                      | `'Escribe una duda y yo te ayudaré en lo que pueda'` |
+| `avatarUrl`       | `string` (URL de imagen)                      | osito ilustrado                                      |
+| `placeholder`     | `string`                                      | `'Escribe un mensaje…'`                              |
+| `suggestions`     | `string[]`                                    | `[]`                                                 |
+| `position`        | `'bottom-right' \| 'bottom-left'`             | `'bottom-right'`                                     |
+| `theme`           | `'light' \| 'dark' \| 'auto'`                 | `'light'`                                            |
+| `primaryColor`    | color CSS                                     | `#6d4aff`                                            |
+| `mode`            | `'floating' \| 'inline'`                      | `'floating'`                                         |
+| `defaultOpen`     | `boolean`                                     | `false`                                              |
+| `initialMessages` | `ChatMessage[]`                               | `[]`                                                 |
+| `attribution`     | `AttributionInfo` (p. ej. `TMDB_ATTRIBUTION`) | —                                                    |
+| `openUrl`         | `(url: string) => boolean`                    | abre una pestaña con `window.open`                   |
+| `onOpenChange`    | `(open: boolean) => void`                     | —                                                    |
 
 ### Conectar un agente real (fase 2)
 
@@ -167,4 +229,7 @@ inspiradas en el wireframe, según la libertad de estilos otorgada.
 ## Tecnologías
 
 React 19 · TypeScript · Vite · Vitest + Testing Library · ESLint + Prettier ·
-react-markdown + remark-gfm · ws (servidor mock) · GitHub Actions
+react-markdown + remark-gfm · ws (servidor mock y del agente) · GitHub Actions ·
+Model Context Protocol (SDK oficial) · Groq (API compatible con OpenAI) · Claude (SDK oficial
+de Anthropic, opcional) · zod ·
+TMDB API · Google Books API

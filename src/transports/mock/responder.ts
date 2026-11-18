@@ -5,7 +5,13 @@
  * por eso NO debe tener imports de valores: Node lo ejecuta directamente con type stripping.
  */
 
-export type MockReply = { content: string } | { error: string };
+export interface MockLink {
+  url: string;
+  label: string;
+}
+
+/** `links`: sitios de referencia que el agente simulado abre en una pestaña (evento `open_url`). */
+export type MockReply = { content: string; links?: MockLink[] } | { error: string };
 
 export type MockResponder = (userMessage: string) => MockReply;
 
@@ -15,7 +21,12 @@ const HELP = `Soy el **agente de demostración** de AGIChat 🤖. Prueba escribi
 - \`tabla\` → una tabla
 - \`código\` → un bloque de código
 - \`lista\` → listas y tareas
-- \`error\` → simula un fallo del agente`;
+- \`recomiéndame una película\` → recomendación con póster (datos de ejemplo de TMDB)
+- \`compárala con el libro\` → comparación película vs. libro
+- \`abre IMDb\` → abre la ficha de IMDb en una pestaña nueva
+- \`error\` → simula un fallo del agente
+
+> Para respuestas reales usa el backend **Agente real** (\`npm run agent-server\`).`;
 
 const TABLE = `Estos son los planes de AGIChat:
 
@@ -74,9 +85,42 @@ Texto en **negrita**, *cursiva*, ~~tachado~~ y un [enlace](https://github.com).
 
 const UNIVERSE = `Según *La guía del autoestopista galáctico* de Douglas Adams, la respuesta a la pregunta última sobre la vida, el universo y todo lo demás es **42**.`;
 
+const DUNE_POSTER = 'https://image.tmdb.org/t/p/w342/d5NXSklXo0qyIYkgV94XAgMIckC.jpg';
+
+const RECOMMENDATION = `¡Tengo una para ti! 🎬
+
+![Póster de Dune](${DUNE_POSTER})
+
+**Dune** (2021) · ⭐ 7.8/10 · Ciencia ficción, aventura
+
+Paul Atreides viaja a Arrakis, el planeta más peligroso del universo, para asegurar el futuro de su familia. Visualmente impresionante y con una banda sonora enorme.
+
+📚 **Dune** está basada en la novela de Frank Herbert (1965). ¿Quieres que la compare con el libro y te diga si vale la pena verla?`;
+
+const COMPARISON = `**Dune (2021) vs. *Dune* de Frank Herbert (1965)**
+
+| | Película | Libro |
+| :--- | :---: | :---: |
+| Calificación | ⭐ 7.8 (TMDB) | ⭐ 4.5 (Google Books) |
+| Duración | 155 min | ~700 páginas |
+| Historia | Primera mitad del libro | Completa |
+
+**Veredicto: vale la pena verla.** Es fiel al tono y al mundo del libro, y su apartado visual es sobresaliente. Eso sí, la novela profundiza mucho más en la política y los pensamientos de los personajes: si te gusta, léela después.`;
+
+const IMDB = `Listo, abrí la ficha de **Dune** en IMDb en una pestaña nueva. 🍿`;
+
 const RULES: Array<{ pattern: RegExp; reply: MockReply }> = [
   { pattern: /\berror\b/i, reply: { error: 'El agente simulado falló a propósito. 💥' } },
   { pattern: /\bmarkdown\b/i, reply: { content: MARKDOWN } },
+  {
+    pattern: /\bimdb\b/i,
+    reply: {
+      content: IMDB,
+      links: [{ url: 'https://www.imdb.com/title/tt1160419/', label: 'IMDb: Dune' }],
+    },
+  },
+  { pattern: /\b(libro|novela|compara)/i, reply: { content: COMPARISON } },
+  { pattern: /recomi[eé]nd|pel[ií]cula/i, reply: { content: RECOMMENDATION } },
   { pattern: /\btabla|table\b/i, reply: { content: TABLE } },
   { pattern: /c[oó]digo|\bcode\b/i, reply: { content: CODE } },
   { pattern: /\blista|list\b/i, reply: { content: LIST } },
